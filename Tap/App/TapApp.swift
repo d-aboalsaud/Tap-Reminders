@@ -47,6 +47,7 @@ struct TapApp: App {
 
 struct RootView: View {
     @EnvironmentObject private var router: AppRouter
+    @AppStorage("appearanceMode") private var appearanceModeRaw = AppearanceMode.system.rawValue
 
     var body: some View {
         TabView(selection: $router.selectedTab) {
@@ -60,5 +61,8 @@ struct RootView: View {
                 .tabItem { Label("Places", systemImage: "mappin.and.ellipse") }
                 .tag(2)
         }
+        .preferredColorScheme(
+            (AppearanceMode(rawValue: appearanceModeRaw) ?? .system).colorScheme
+        )
     }
 }

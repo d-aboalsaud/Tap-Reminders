@@ -2,17 +2,62 @@ import SwiftUI
 import UIKit
 
 extension Color {
-    /// Brand colors — match the app icon's indigo→blue gradient.
-    static let tapIndigo = Color(red: 0.13, green: 0.10, blue: 0.36)
-    static let tapBlue = Color(red: 0.15, green: 0.35, blue: 0.95)
+    /// Brand colors — adaptive: deep on light backgrounds, lifted on dark so
+    /// chips and tinted text stay readable.
+    static let tapIndigo = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.64, green: 0.66, blue: 1.00, alpha: 1)
+            : UIColor(red: 0.13, green: 0.10, blue: 0.36, alpha: 1)
+    })
+    static let tapBlue = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.42, green: 0.58, blue: 1.00, alpha: 1)
+            : UIColor(red: 0.15, green: 0.35, blue: 0.95, alpha: 1)
+    })
 }
 
 extension LinearGradient {
+    /// The icon's gradient — fixed colors so the brand look is identical in
+    /// both modes (always used with white foreground content).
     static let tapBrand = LinearGradient(
-        colors: [.tapIndigo, .tapBlue],
+        colors: [
+            Color(red: 0.13, green: 0.10, blue: 0.36),
+            Color(red: 0.15, green: 0.35, blue: 0.95),
+        ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
+}
+
+/// User-selectable appearance, persisted via @AppStorage("appearanceMode").
+enum AppearanceMode: String, CaseIterable, Identifiable {
+    case system, light, dark
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .system: return "System"
+        case .light: return "Light"
+        case .dark: return "Dark"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .system: return "iphone"
+        case .light: return "sun.max"
+        case .dark: return "moon"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
 }
 
 enum Haptics {

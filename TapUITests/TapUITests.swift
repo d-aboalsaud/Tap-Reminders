@@ -10,6 +10,9 @@ final class TapUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
+        // UserDefaults honors command-line overrides: start in text mode so
+        // capture tests don't depend on tapping the mode segment.
+        app.launchArguments += ["-lastCaptureMode", "text"]
         app.launch()
         dismissSystemAlerts()
     }
@@ -42,6 +45,8 @@ final class TapUITests: XCTestCase {
 
     private func typeCapture(_ text: String) {
         goToTab("Capture")
+        let textSegment = app.buttons["Text"]
+        if textSegment.waitForExistence(timeout: 2) { textSegment.tap() }
         let field = app.textFields["captureField"]
         if !field.waitForExistence(timeout: 3) {
             // Multiline TextField can surface as textView

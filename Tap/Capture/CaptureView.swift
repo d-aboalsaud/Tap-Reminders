@@ -10,6 +10,7 @@ struct CaptureView: View {
     @Query private var savedPlaces: [SavedPlace]
 
     @AppStorage("lastCaptureMode") private var lastModeRaw = CaptureMode.text.rawValue
+    @AppStorage("appearanceMode") private var appearanceModeRaw = AppearanceMode.system.rawValue
     @StateObject private var voice = VoiceCaptureController()
     @State private var text = ""
     @State private var isUrgent = false
@@ -53,6 +54,20 @@ struct CaptureView: View {
             }
             .padding()
             .navigationTitle("Tap.")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("Appearance", selection: $appearanceModeRaw) {
+                            ForEach(AppearanceMode.allCases) { mode in
+                                Label(mode.label, systemImage: mode.icon).tag(mode.rawValue)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "circle.lefthalf.filled")
+                    }
+                    .accessibilityLabel("Appearance")
+                }
+            }
             .animation(.snappy(duration: 0.25), value: currentInput)
             .animation(.snappy(duration: 0.25), value: isUrgent)
             .sheet(item: $justSaved) { reminder in

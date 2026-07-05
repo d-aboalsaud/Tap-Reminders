@@ -1,0 +1,52 @@
+name: Tap
+options:
+  bundleIdPrefix: com.tap
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+schemes:
+  Tap:
+    build:
+      targets:
+        Tap: all
+        TapUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - TapUITests
+targets:
+  TapUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: TapUITests
+    dependencies:
+      - target: Tap
+    settings:
+      base:
+        TEST_TARGET_NAME: Tap
+        GENERATE_INFOPLIST_FILE: YES
+  Tap:
+    type: application
+    platform: iOS
+    sources:
+      - path: Tap
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tap.reminders
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: 1
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Tap uses the microphone so you can capture reminders by voice."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Tap transcribes your voice to create reminders."
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Tap uses your location to remind you when you arrive at or leave places."
+        INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Tap needs background location access so location reminders fire even when the app is closed."
+        INFOPLIST_KEY_UIBackgroundModes: location
+        SWIFT_VERSION: 5.9
+        TARGETED_DEVICE_FAMILY: 1
+        CODE_SIGN_STYLE: Automatic

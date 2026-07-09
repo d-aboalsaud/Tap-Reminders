@@ -2,6 +2,8 @@
 
 **Sub-3-second reminder capture.** Say it or type it — Tap parses the time, the place, and the urgency, saves instantly, and gets out of your way.
 
+**Website:** [d-aboalsaud.github.io/Tap-Reminders](https://d-aboalsaud.github.io/Tap-Reminders/) · [Privacy Policy](https://d-aboalsaud.github.io/Tap-Reminders/privacy.html)
+
 > "Call dad at 6 pm when I go out from work" → 🕕 6:00 PM · 📍 Leaving Work · saved.
 
 <p align="center">
@@ -64,4 +66,4 @@ XCUITest covers: place creation on the map, time-only capture, both-conditions r
 - [ ] Arabic capture (script + speech locale), beyond the current transliterated phrases
 - [ ] Urgent escalation — re-alert until acknowledged
 - [ ] Bare-hour times ("at 7")
-- [ ] App Store release
+- [ ] App Store release (privacy policy ✅ — [live here](https://d-aboalsaud.github.io/Tap-Reminders/privacy.html))

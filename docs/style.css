@@ -1,0 +1,220 @@
+/* Tap. — shared site styles. Brand: indigo #211A5C → blue #2659F2 (app icon gradient). */
+
+:root {
+  --indigo: #211a5c;
+  --blue: #2659f2;
+  --chip-blue: #2659f2;
+  --chip-indigo: #211a5c;
+  --bg: #ffffff;
+  --bg-soft: #f4f5f9;
+  --text: #16181d;
+  --text-2: #5a5f6b;
+  --card: #ffffff;
+  --border: #e4e6ee;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --chip-blue: #6b94ff;
+    --chip-indigo: #a3a8ff;
+    --bg: #0b0c10;
+    --bg-soft: #14161c;
+    --text: #f2f3f7;
+    --text-2: #9aa0ad;
+    --card: #171a21;
+    --border: #262a34;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 88px 24px 72px;
+  background: linear-gradient(135deg, var(--indigo), var(--blue));
+  color: #fff;
+}
+
+.hero .ring {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(255, 255, 255, 0.10);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.ring.r1 { width: 340px; height: 340px; }
+.ring.r2 { width: 520px; height: 520px; border-width: 3px; }
+.ring.r3 { width: 720px; height: 720px; border-width: 4px; }
+
+.hero img.icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+
+.hero h1 {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-top: 20px;
+  position: relative;
+}
+
+.hero p.tagline {
+  font-size: 21px;
+  opacity: 0.92;
+  margin-top: 6px;
+  position: relative;
+}
+
+.soon {
+  display: inline-block;
+  margin-top: 26px;
+  padding: 9px 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  position: relative;
+}
+
+/* ---------- Example parse ---------- */
+
+.example {
+  background: var(--bg-soft);
+  padding: 44px 24px;
+  text-align: center;
+}
+
+.example .said {
+  font-size: 19px;
+  font-style: italic;
+  color: var(--text-2);
+}
+
+.example .arrow { font-size: 22px; margin: 10px 0 14px; color: var(--text-2); }
+
+.chips { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--chip-blue) 12%, transparent);
+  color: var(--chip-blue);
+}
+
+.chip.place {
+  background: color-mix(in srgb, var(--chip-indigo) 12%, transparent);
+  color: var(--chip-indigo);
+}
+
+.example .saved {
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+/* ---------- Features ---------- */
+
+.features { padding: 64px 0; }
+
+.features h2, .shots h2 {
+  text-align: center;
+  font-size: 32px;
+  letter-spacing: -0.5px;
+  margin-bottom: 40px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.card .emoji { font-size: 26px; }
+
+.card h3 { font-size: 17px; margin: 10px 0 6px; }
+
+.card p { font-size: 15px; color: var(--text-2); }
+
+/* ---------- Screenshots ---------- */
+
+.shots { background: var(--bg-soft); padding: 64px 0 72px; }
+
+.shots .row {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 4px 24px 16px;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+.shots img {
+  width: 220px;
+  border-radius: 26px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(10, 12, 40, 0.14);
+  scroll-snap-align: center;
+  flex-shrink: 0;
+}
+
+/* ---------- Footer ---------- */
+
+footer {
+  text-align: center;
+  padding: 44px 24px 56px;
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+footer a { color: var(--chip-blue); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer .links { display: flex; gap: 22px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+
+/* ---------- Privacy page ---------- */
+
+.doc { max-width: 720px; margin: 0 auto; padding: 56px 24px 80px; }
+.doc h1 { font-size: 36px; letter-spacing: -0.5px; margin-bottom: 4px; }
+.doc .date { color: var(--text-2); font-size: 15px; margin-bottom: 32px; }
+.doc h2 { font-size: 21px; margin: 30px 0 8px; }
+.doc p, .doc li { font-size: 16px; color: var(--text); }
+.doc ul { padding-left: 22px; margin: 8px 0; }
+.doc .back { display: inline-block; margin-bottom: 28px; color: var(--chip-blue); text-decoration: none; font-weight: 600; }
+
+@media (max-width: 560px) {
+  .hero h1 { font-size: 44px; }
+  .hero p.tagline { font-size: 18px; }
+  .features h2, .shots h2 { font-size: 26px; }
+}

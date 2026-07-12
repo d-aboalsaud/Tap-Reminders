@@ -40,6 +40,12 @@ final class TapUITests: XCTestCase {
     }
 
     private func goToTab(_ name: String) {
+        // The floating tab bar is covered while the keyboard is up — dismiss first.
+        let hideKeyboard = app.buttons["Hide keyboard"]
+        if hideKeyboard.exists && hideKeyboard.isHittable {
+            hideKeyboard.tap()
+            usleep(400_000)
+        }
         app.tabBars.buttons[name].tap()
     }
 

@@ -12,9 +12,7 @@ struct ReminderDetailView: View {
 
     @Bindable var reminder: Reminder
 
-    @State private var showTimeEditor = false
     @State private var showLocationEditor = false
-    @State private var draftDate: Date = .now.addingTimeInterval(3600)
 
     var body: some View {
         Form {
@@ -55,7 +53,6 @@ struct ReminderDetailView: View {
         .navigationTitle("Edit")
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { persist() }
-        .sheet(isPresented: $showTimeEditor) { timeEditor }
         .sheet(isPresented: $showLocationEditor) {
             LocationConditionEditor(reminder: reminder) { persist() }
         }
@@ -65,16 +62,13 @@ struct ReminderDetailView: View {
 
     private var timeSection: some View {
         Section("Time") {
-            if let date = reminder.fireDate {
-                HStack {
-                    Label(date.formatted(date: .abbreviated, time: .shortened), systemImage: "clock")
-                    Spacer()
-                    Button("Change") {
-                        draftDate = date
-                        showTimeEditor = true
-                    }
-                    .font(.callout)
-                }
+            if reminder.hasTimeCondition {
+                DatePicker(
+                    "Remind me at",
+                    selection: fireDateBinding,
+                    in: Date.now...,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
                 Button("Remove time", role: .destructive) {
                     guard reminder.hasLocationCondition else { return }
                     reminder.fireDate = nil
@@ -83,38 +77,49 @@ struct ReminderDetailView: View {
                 }
                 .disabled(!reminder.hasLocationCondition)
             } else {
+                HStack(spacing: 8) {
+                    quickTimeButton("In 1 hour", date: .now.addingTimeInterval(3600))
+                    quickTimeButton("Tonight", date: tonight)
+                    quickTimeButton("Tomorrow 9 AM", date: tomorrowMorning)
+                }
                 Button {
-                    draftDate = .now.addingTimeInterval(3600)
-                    showTimeEditor = true
+                    setFireDate(.now.addingTimeInterval(3600))
                 } label: {
-                    Label("Add time", systemImage: "plus.circle")
+                    Label("Pick date & time", systemImage: "calendar.badge.clock")
                 }
             }
         }
     }
 
-    private var timeEditor: some View {
-        NavigationStack {
-            DatePicker("Remind me at", selection: $draftDate, in: Date.now...)
-                .datePickerStyle(.graphical)
-                .padding()
-                .navigationTitle("Set time")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Set") {
-                            reminder.fireDate = draftDate
-                            reminder.timeFired = false
-                            showTimeEditor = false
-                            persist()
-                        }
-                    }
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { showTimeEditor = false }
-                    }
-                }
-        }
-        .presentationDetents([.medium, .large])
+    /// Non-optional bridge so the inline DatePicker can edit the optional date.
+    private var fireDateBinding: Binding<Date> {
+        Binding(
+            get: { reminder.fireDate ?? .now.addingTimeInterval(3600) },
+            set: { setFireDate($0) }
+        )
+    }
+
+    private func quickTimeButton(_ label: String, date: Date) -> some View {
+        Button(label) { setFireDate(date) }
+            .font(.subheadline.weight(.medium))
+            .buttonStyle(.bordered)
+            .buttonBorderShape(.capsule)
+    }
+
+    private func setFireDate(_ date: Date) {
+        reminder.fireDate = date
+        reminder.timeFired = false
+        persist()
+    }
+
+    private var tonight: Date {
+        let today8pm = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: .now) ?? .now
+        return today8pm > .now ? today8pm : today8pm.addingTimeInterval(86400)
+    }
+
+    private var tomorrowMorning: Date {
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: .now) ?? .now
+        return Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: tomorrow) ?? tomorrow
     }
 
     // MARK: - Location

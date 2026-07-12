@@ -46,13 +46,19 @@ struct CaptureView: View {
                     textUI
                 }
 
+                // Animation scoped to the chips only — animating the whole
+                // stack on every keystroke breaks TextField text rendering.
                 liveChips
+                    .animation(.snappy(duration: 0.25), value: currentInput)
+                    .animation(.snappy(duration: 0.25), value: isUrgent)
 
                 Spacer()
 
                 modeToggle
             }
             .padding()
+            .contentShape(Rectangle())
+            .onTapGesture { textFocused = false }
             .navigationTitle("Tap.")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -68,8 +74,6 @@ struct CaptureView: View {
                     .accessibilityLabel("Appearance")
                 }
             }
-            .animation(.snappy(duration: 0.25), value: currentInput)
-            .animation(.snappy(duration: 0.25), value: isUrgent)
             .sheet(item: $justSaved) { reminder in
                 NavigationStack {
                     ReminderDetailView(reminder: reminder)
@@ -161,15 +165,32 @@ struct CaptureView: View {
 
     private var textUI: some View {
         VStack(spacing: 16) {
-            TextField("e.g. buy milk at 6pm  ·  call mom when I get to Home", text: $text, axis: .vertical)
+            TextField("buy milk at 6pm · call mom at Home", text: $text)
                 .font(.title3)
                 .textFieldStyle(.plain)
                 .accessibilityIdentifier("captureField")
                 .focused($textFocused)
                 .submitLabel(.done)
-                .onSubmit { commit(text, spoken: false) }
+                .onSubmit {
+                    if text.trimmingCharacters(in: .whitespaces).isEmpty {
+                        textFocused = false
+                    } else {
+                        commit(text, spoken: false)
+                    }
+                }
                 .padding()
                 .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 14))
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button {
+                            textFocused = false
+                        } label: {
+                            Image(systemName: "keyboard.chevron.compact.down")
+                        }
+                        .accessibilityLabel("Hide keyboard")
+                    }
+                }
 
             urgencyToggle
 

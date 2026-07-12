@@ -14,6 +14,12 @@ extension Color {
             ? UIColor(red: 0.42, green: 0.58, blue: 1.00, alpha: 1)
             : UIColor(red: 0.15, green: 0.35, blue: 0.95, alpha: 1)
     })
+    /// Warning amber — readable yellow in dark, amber in light.
+    static let tapWarning = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 1.00, green: 0.84, blue: 0.20, alpha: 1)
+            : UIColor(red: 0.72, green: 0.46, blue: 0.02, alpha: 1)
+    })
 }
 
 extension LinearGradient {

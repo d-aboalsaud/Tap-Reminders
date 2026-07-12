@@ -98,6 +98,13 @@ struct ReminderRow: View {
             }
 
             HStack(spacing: 6) {
+                if !reminder.hasTimeCondition && !reminder.hasLocationCondition {
+                    ConditionChip(
+                        icon: "exclamationmark.triangle.fill",
+                        text: "No time or place yet",
+                        tint: .tapWarning
+                    )
+                }
                 if let date = reminder.fireDate {
                     ConditionChip(
                         icon: "clock.fill",

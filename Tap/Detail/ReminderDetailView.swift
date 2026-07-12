@@ -13,7 +13,6 @@ struct ReminderDetailView: View {
     @Bindable var reminder: Reminder
 
     @State private var showLocationEditor = false
-    @State private var showOnlyConditionAlert = false
 
     var body: some View {
         Form {
@@ -57,11 +56,6 @@ struct ReminderDetailView: View {
         .sheet(isPresented: $showLocationEditor) {
             LocationConditionEditor(reminder: reminder) { persist() }
         }
-        .alert("This is the only condition", isPresented: $showOnlyConditionAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("A reminder needs a time or a place to fire. Add the other condition first, or delete the whole reminder below.")
-        }
     }
 
     // MARK: - Time
@@ -76,13 +70,9 @@ struct ReminderDetailView: View {
                     displayedComponents: [.date, .hourAndMinute]
                 )
                 Button("Remove time", role: .destructive) {
-                    if reminder.hasLocationCondition {
-                        reminder.fireDate = nil
-                        reminder.timeFired = false
-                        persist()
-                    } else {
-                        showOnlyConditionAlert = true
-                    }
+                    reminder.fireDate = nil
+                    reminder.timeFired = false
+                    persist()
                 }
             } else {
                 HStack(spacing: 8) {
@@ -162,12 +152,8 @@ struct ReminderDetailView: View {
                         .font(.callout)
                 }
                 Button("Remove location", role: .destructive) {
-                    if reminder.hasTimeCondition {
-                        clearLocation()
-                        persist()
-                    } else {
-                        showOnlyConditionAlert = true
-                    }
+                    clearLocation()
+                    persist()
                 }
             } else {
                 Button {

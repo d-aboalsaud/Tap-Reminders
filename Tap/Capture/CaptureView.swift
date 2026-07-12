@@ -7,6 +7,7 @@ import SwiftData
 struct CaptureView: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var geofence: GeofenceManager
+    @EnvironmentObject private var router: AppRouter
     @Query private var savedPlaces: [SavedPlace]
 
     @AppStorage("lastCaptureMode") private var lastModeRaw = CaptureMode.text.rawValue
@@ -72,6 +73,14 @@ struct CaptureView: View {
                         Image(systemName: "circle.lefthalf.filled")
                     }
                     .accessibilityLabel("Appearance")
+                }
+            }
+            .onChange(of: router.captureFocusRequest) { _, _ in
+                // Fast-capture reset: refocus after the tab switch settles.
+                guard mode == .text else { return }
+                Task {
+                    try? await Task.sleep(for: .milliseconds(350))
+                    textFocused = true
                 }
             }
             .sheet(item: $justSaved) { reminder in

@@ -8,6 +8,8 @@ final class AppRouter: ObservableObject {
     static let shared = AppRouter()
     @Published var pendingReminderID: UUID?
     @Published var selectedTab: Int = 0
+    /// Bumped to ask the capture screen to focus its text field (fast-capture reset).
+    @Published var captureFocusRequest: UUID?
 }
 
 /// UNUserNotificationCenter delegate: shows banners while the app is in the

@@ -6,6 +6,10 @@ struct TapApp: App {
     let container: ModelContainer
     @StateObject private var geofence = GeofenceManager.shared
     @Environment(\.scenePhase) private var scenePhase
+    @State private var backgroundedAt: Date?
+
+    /// Away longer than this → snap back to Capture, ready to type.
+    private static let captureResetAfter: TimeInterval = 120
 
     init() {
         do {
@@ -30,7 +34,24 @@ struct TapApp: App {
                     reconcile()
                 }
                 .onChange(of: scenePhase) { _, phase in
-                    if phase == .active { reconcile() }
+                    switch phase {
+                    case .active:
+                        reconcile()
+                        // Fast-capture reset: away long enough means the user is
+                        // back to add something — land them typing. Quick app
+                        // switches and notification taps keep their context.
+                        if let away = backgroundedAt,
+                           Date.now.timeIntervalSince(away) > Self.captureResetAfter,
+                           AppRouter.shared.pendingReminderID == nil {
+                            AppRouter.shared.selectedTab = 0
+                            AppRouter.shared.captureFocusRequest = UUID()
+                        }
+                        backgroundedAt = nil
+                    case .background:
+                        backgroundedAt = .now
+                    default:
+                        break
+                    }
                 }
         }
         .modelContainer(container)

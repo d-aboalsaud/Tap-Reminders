@@ -104,8 +104,11 @@ final class Reminder {
     var regionID: String { "region-\(id.uuidString)" }
 
     /// A reminder is done once every set condition has fired (or it's marked completed).
+    /// A reminder with no conditions yet is NOT resolved — it's waiting for setup
+    /// and must stay visible in Upcoming.
     var isResolved: Bool {
         if isCompleted { return true }
+        guard hasTimeCondition || hasLocationCondition else { return false }
         let timeDone = !hasTimeCondition || timeFired
         let locationDone = !hasLocationCondition || locationFired
         return timeDone && locationDone

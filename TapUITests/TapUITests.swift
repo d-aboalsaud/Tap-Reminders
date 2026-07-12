@@ -40,13 +40,19 @@ final class TapUITests: XCTestCase {
     }
 
     private func goToTab(_ name: String) {
-        // The floating tab bar is covered while the keyboard is up — dismiss first.
-        let hideKeyboard = app.buttons["Hide keyboard"]
-        if hideKeyboard.exists && hideKeyboard.isHittable {
-            hideKeyboard.tap()
+        // The floating tab bar is covered while the keyboard is up — dismiss
+        // first, and retry: the keyboard animation can race the tab tap.
+        for _ in 0..<3 {
+            let hideKeyboard = app.buttons["Hide keyboard"]
+            if hideKeyboard.exists && hideKeyboard.isHittable {
+                hideKeyboard.tap()
+                usleep(400_000)
+            }
+            let tab = app.tabBars.buttons[name]
+            if tab.waitForExistence(timeout: 3) { tab.tap() }
             usleep(400_000)
+            if tab.isSelected { return }
         }
-        app.tabBars.buttons[name].tap()
     }
 
     private func typeCapture(_ text: String) {

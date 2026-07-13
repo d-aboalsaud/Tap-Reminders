@@ -49,41 +49,54 @@ enum RaceCoordinator {
         else { return }
 
         if reminder.isRace {
-            await resolveRaceLocationEvent(reminder)
+            await resolveRaceLocationEvent(reminder, context: context)
         } else {
-            deliverLocationOnly(fired: reminder, allReminders: all, geofence: geofence)
+            await deliverLocationOnly(fired: reminder, allReminders: all, geofence: geofence, context: context)
         }
 
         reminder.locationFired = true
         geofence.stopMonitoring(reminder)
         try? context.save()
+        NotificationScheduler.updateBadgeNow(context: context)
     }
 
     // MARK: - Race resolution (location leg fired)
 
-    private static func resolveRaceLocationEvent(_ reminder: Reminder) async {
+    private static func resolveRaceLocationEvent(_ reminder: Reminder, context: ModelContext) async {
         let timeStillPending = await NotificationScheduler.isTimeLegStillPending(for: reminder)
         if timeStillPending {
             // Location won the race → soft ping now, upgrade the pending time leg to full.
-            NotificationScheduler.deliverNow(
-                id: reminder.locationNotificationID,
-                content: NotificationScheduler.softContent(for: reminder, leg: .location)
-            )
+            let content = NotificationScheduler.softContent(for: reminder, leg: .location)
+            await attachMapIfPossible(to: content, reminder: reminder)
+            NotificationScheduler.deliverNow(id: reminder.locationNotificationID, content: content)
             NotificationScheduler.rewriteTimeLegAsFull(for: reminder)
         } else {
             // Time already fired (as the soft ping) → location is second → full content.
-            NotificationScheduler.deliverNow(
-                id: reminder.locationNotificationID,
-                content: NotificationScheduler.fullContent(for: reminder)
-            )
+            let content = NotificationScheduler.fullContent(for: reminder)
+            await attachMapIfPossible(to: content, reminder: reminder)
+            content.badge = NSNumber(value: NotificationScheduler.unhandledCount(in: context) + 1)
+            NotificationScheduler.deliverNow(id: reminder.locationNotificationID, content: content)
+            NotificationScheduler.scheduleNags(for: reminder, startingAt: .now)
         }
+    }
+
+    private static func attachMapIfPossible(to content: UNMutableNotificationContent, reminder: Reminder) async {
+        guard let coordinate = reminder.locationCoordinate else { return }
+        await NotificationScheduler.attachMapSnapshot(
+            to: content, coordinate: coordinate, radius: reminder.locationRadius
+        )
     }
 
     // MARK: - Location-only delivery with stacking
 
     /// Multiple location-only reminders sharing the same place+trigger group into
     /// ONE combined notification instead of separate pings.
-    private static func deliverLocationOnly(fired: Reminder, allReminders: [Reminder], geofence: GeofenceManager) {
+    private static func deliverLocationOnly(
+        fired: Reminder,
+        allReminders: [Reminder],
+        geofence: GeofenceManager,
+        context: ModelContext
+    ) async {
         let siblings = allReminders.filter { other in
             other.id != fired.id
             && !other.isRace
@@ -94,10 +107,11 @@ enum RaceCoordinator {
         }
 
         if siblings.isEmpty {
-            NotificationScheduler.deliverNow(
-                id: fired.locationNotificationID,
-                content: NotificationScheduler.fullContent(for: fired)
-            )
+            let content = NotificationScheduler.fullContent(for: fired)
+            await attachMapIfPossible(to: content, reminder: fired)
+            content.badge = NSNumber(value: NotificationScheduler.unhandledCount(in: context) + 1)
+            NotificationScheduler.deliverNow(id: fired.locationNotificationID, content: content)
+            NotificationScheduler.scheduleNags(for: fired, startingAt: .now)
         } else {
             let group = [fired] + siblings
             NotificationScheduler.deliverStacked(

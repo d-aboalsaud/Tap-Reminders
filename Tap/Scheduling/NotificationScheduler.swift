@@ -1,5 +1,8 @@
 import Foundation
 import UserNotifications
+import MapKit
+import SwiftData
+import UIKit
 
 /// Builds and schedules local notifications for reminders, including the
 /// soft-ping vs full-content distinction used by time+location race mode.
@@ -9,6 +12,18 @@ enum NotificationScheduler {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
     }
 
+    // MARK: - Signature sounds
+
+    static let chime = UNNotificationSound(named: UNNotificationSoundName("tap-chime.caf"))
+    static let urgentChime = UNNotificationSound(named: UNNotificationSoundName("tap-urgent.caf"))
+
+    // MARK: - Urgent re-alert ("nag") settings
+
+    /// Urgent reminders re-fire this often until acknowledged…
+    static let nagInterval: TimeInterval = 10 * 60
+    /// …up to this many times (1 hour of nagging).
+    static let nagCount = 6
+
     // MARK: - Content builders
 
     static func fullContent(for reminder: Reminder) -> UNMutableNotificationContent {
@@ -17,10 +32,10 @@ enum NotificationScheduler {
         if let name = reminder.locationName, reminder.hasLocationCondition {
             content.subtitle = reminder.triggerType == .leave ? "Leaving \(name)" : "At \(name)"
         }
-        content.sound = reminder.isUrgent ? .defaultCritical : .default
+        content.sound = reminder.isUrgent ? urgentChime : chime
         content.interruptionLevel = reminder.isUrgent ? .timeSensitive : .active
         content.categoryIdentifier = NotificationDelegate.categoryID
-        content.userInfo = ["reminderID": reminder.id.uuidString]
+        content.userInfo = ["reminderID": reminder.id.uuidString, "isUrgent": reminder.isUrgent]
         return content
     }
 
@@ -54,13 +69,22 @@ enum NotificationScheduler {
         let content = reminder.isRace
             ? softContent(for: reminder, leg: .time)
             : fullContent(for: reminder)
+        // Badge estimate at schedule time; corrected on next app open.
+        if !reminder.isRace, let context = reminder.modelContext {
+            content.badge = NSNumber(value: unhandledCount(in: context) + 1)
+        }
         schedule(id: reminder.timeNotificationID, content: content, fireDate: fireDate)
+        // Race time-leg starts as a soft ping — no nagging until full content fires.
+        if !reminder.isRace {
+            scheduleNags(for: reminder, startingAt: fireDate)
+        }
     }
 
     static func rewriteTimeLegAsFull(for reminder: Reminder) {
         guard let fireDate = reminder.fireDate, fireDate > .now else { return }
         cancelTimeLeg(for: reminder)
         schedule(id: reminder.timeNotificationID, content: fullContent(for: reminder), fireDate: fireDate)
+        scheduleNags(for: reminder, startingAt: fireDate)
     }
 
     static func cancelTimeLeg(for reminder: Reminder) {
@@ -71,6 +95,7 @@ enum NotificationScheduler {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: [reminder.timeNotificationID, reminder.locationNotificationID]
         )
+        cancelNags(reminderID: reminder.id)
     }
 
     // MARK: - Immediate delivery (location events, stacking)
@@ -88,9 +113,98 @@ enum NotificationScheduler {
         content.body = reminders
             .map { ($0.isUrgent ? "🔥 " : "• ") + $0.content }
             .joined(separator: "\n")
-        content.sound = anyUrgent ? .defaultCritical : .default
+        content.sound = anyUrgent ? urgentChime : chime
         content.interruptionLevel = anyUrgent ? .timeSensitive : .active
         deliverNow(id: "stack-\(UUID().uuidString)", content: content)
+    }
+
+    // MARK: - Urgent re-alert (nag) series
+
+    /// Schedules follow-up urgent notifications every `nagInterval` after
+    /// `start`, cancelled when the user acts (Done / Snooze / opens it).
+    static func scheduleNags(for reminder: Reminder, startingAt start: Date) {
+        guard reminder.isUrgent else { return }
+        let center = UNUserNotificationCenter.current()
+        for i in 1...nagCount {
+            let fireAt = start.addingTimeInterval(nagInterval * Double(i))
+            guard fireAt > .now else { continue }
+            let content = fullContent(for: reminder)
+            content.title = "🔥 Still waiting: \(reminder.content)"
+            let components = Calendar.current.dateComponents(
+                [.year, .month, .day, .hour, .minute, .second], from: fireAt
+            )
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            center.add(UNNotificationRequest(
+                identifier: nagID(reminder.id, i), content: content, trigger: trigger
+            ))
+        }
+    }
+
+    static func cancelNags(reminderID: UUID) {
+        let ids = (1...nagCount).map { nagID(reminderID, $0) }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
+    }
+
+    private static func nagID(_ id: UUID, _ index: Int) -> String {
+        "nag-\(id.uuidString)-\(index)"
+    }
+
+    // MARK: - App icon badge
+
+    /// Reminders whose conditions all fired but the user hasn't completed.
+    static func unhandledCount(in context: ModelContext) -> Int {
+        let all = (try? context.fetch(FetchDescriptor<Reminder>())) ?? []
+        return all.filter { $0.isResolved && !$0.isCompleted }.count
+    }
+
+    static func updateBadgeNow(context: ModelContext) {
+        UNUserNotificationCenter.current().setBadgeCount(unhandledCount(in: context))
+    }
+
+    // MARK: - Map attachment for place notifications
+
+    /// Attaches a map snapshot of the geofenced place. Best-effort: if the
+    /// snapshot can't be produced (no network in the background window), the
+    /// notification simply goes out without an image.
+    static func attachMapSnapshot(
+        to content: UNMutableNotificationContent,
+        coordinate: CLLocationCoordinate2D,
+        radius: Double
+    ) async {
+        let options = MKMapSnapshotter.Options()
+        options.region = MKCoordinateRegion(
+            center: coordinate,
+            latitudinalMeters: max(radius * 8, 600),
+            longitudinalMeters: max(radius * 8, 600)
+        )
+        options.size = CGSize(width: 600, height: 320)
+        guard let snapshot = try? await MKMapSnapshotter(options: options).start() else { return }
+
+        // Draw a brand-blue pin dot at the place.
+        let image = UIGraphicsImageRenderer(size: options.size).image { _ in
+            snapshot.image.draw(at: .zero)
+            let point = snapshot.point(for: coordinate)
+            let dot = UIBezierPath(
+                arcCenter: point, radius: 10, startAngle: 0, endAngle: .pi * 2, clockwise: true
+            )
+            UIColor(red: 0.15, green: 0.35, blue: 0.95, alpha: 1).setFill()
+            dot.fill()
+            UIColor.white.setStroke()
+            dot.lineWidth = 3
+            dot.stroke()
+        }
+
+        guard let data = image.pngData() else { return }
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("map-\(UUID().uuidString).png")
+        do {
+            try data.write(to: url)
+            let attachment = try UNNotificationAttachment(identifier: "map", url: url)
+            content.attachments = [attachment]
+        } catch {
+            // Ship the notification without the image.
+        }
     }
 
     // MARK: - Helpers

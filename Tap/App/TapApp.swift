@@ -63,6 +63,7 @@ struct TapApp: App {
         RaceCoordinator.reconcileFiredTimeLegs(context: context)
         let all = (try? context.fetch(FetchDescriptor<Reminder>())) ?? []
         GeofenceManager.shared.syncMonitoredRegions(reminders: all)
+        NotificationScheduler.updateBadgeNow(context: context)
     }
 }
 

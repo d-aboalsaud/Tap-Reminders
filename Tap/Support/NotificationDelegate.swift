@@ -61,10 +61,17 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
             if let id = reminderID { await markDone(id) }
 
         case Self.snoozeActionID:
+            // Acting on it stops the nagging; the snoozed delivery restarts it.
+            if let id = reminderID {
+                NotificationScheduler.cancelNags(reminderID: id)
+                await rescheduleNagsAfterSnooze(reminderID: id)
+            }
             snooze(response.notification.request.content)
 
         case UNNotificationDefaultActionIdentifier:
+            // Opening the reminder counts as acknowledged.
             if let id = reminderID {
+                NotificationScheduler.cancelNags(reminderID: id)
                 await MainActor.run {
                     AppRouter.shared.selectedTab = 1
                     AppRouter.shared.pendingReminderID = id
@@ -77,6 +84,19 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     }
 
     @MainActor
+    private func rescheduleNagsAfterSnooze(reminderID: UUID) {
+        guard let container = modelContainer else { return }
+        let all = (try? container.mainContext.fetch(FetchDescriptor<Reminder>())) ?? []
+        guard let reminder = all.first(where: { $0.id == reminderID }),
+              reminder.isUrgent, !reminder.isCompleted
+        else { return }
+        NotificationScheduler.scheduleNags(
+            for: reminder,
+            startingAt: .now.addingTimeInterval(Self.snoozeInterval)
+        )
+    }
+
+    @MainActor
     private func markDone(_ id: UUID) {
         guard let container = modelContainer else { return }
         let context = container.mainContext
@@ -86,6 +106,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         NotificationScheduler.cancelAll(for: reminder)
         GeofenceManager.shared.stopMonitoring(reminder)
         try? context.save()
+        NotificationScheduler.updateBadgeNow(context: context)
     }
 
     /// Re-delivers the same content later; category/userInfo carry over so the

@@ -69,6 +69,7 @@ struct ReminderListView: View {
         reminder.isCompleted = true
         RaceCoordinator.deactivate(reminder, geofence: geofence)
         try? context.save()
+        NotificationScheduler.updateBadgeNow(context: context)
         Haptics.success()
     }
 

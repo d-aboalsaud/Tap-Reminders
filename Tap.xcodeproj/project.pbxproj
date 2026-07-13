@@ -11,6 +11,8 @@
 		0DEE7577825904248CD3BD42 /* VoiceCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B910E2C9B228A7B506DCA2 /* VoiceCaptureController.swift */; };
 		1229BAB1FFC58CFADAE3F9A7 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE481AD2DDD054697F059FD3 /* Theme.swift */; };
 		14932FFE779987D6BD30800C /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B155D18CBF0E83626A763726 /* NotificationScheduler.swift */; };
+		353E478225A35475923341C6 /* NotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC4346394B39D982C10B6C3 /* NotificationViewController.swift */; };
+		3AE9BE6E8F13A5FACE0F489F /* TapNotifContent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EFBEFADA670A6B201B3C7392 /* TapNotifContent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5B908B17CF754C12A27AB0FB /* GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20BBCDE1E9B1BDB896458AF5 /* GeofenceManager.swift */; };
 		7B83BCDE6A61A5725BC5B70E /* TapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97A2A7109452E28AE6222AB /* TapApp.swift */; };
 		8DABFE161130BAF5D414ACB3 /* TapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC6E154E305F208CD661293 /* TapUITests.swift */; };
@@ -29,6 +31,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		B5F2C130B8412866559EE7F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A556FF4017413E9FCD57C905 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 55C26F4096213A0C8ECE21B6;
+			remoteInfo = TapNotifContent;
+		};
 		D9E93213DD1675850A418B81 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A556FF4017413E9FCD57C905 /* Project object */;
@@ -38,9 +47,24 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		19C1E4306D557C4A5650A375 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3AE9BE6E8F13A5FACE0F489F /* TapNotifContent.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		10B8334FCCB3F1C383A913F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1110CAD8527860A594C73697 /* ReminderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderListView.swift; sourceTree = "<group>"; };
+		1868F99D690230CF119426BB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1B129CEC37CA06D344308F89 /* CaptureParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureParser.swift; sourceTree = "<group>"; };
 		20BBCDE1E9B1BDB896458AF5 /* GeofenceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeofenceManager.swift; sourceTree = "<group>"; };
 		32D4DEE62C325FBCD7267302 /* NotificationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDelegate.swift; sourceTree = "<group>"; };
@@ -55,11 +79,13 @@
 		ADB4082CDD852F0C10BF2D55 /* Reminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reminder.swift; sourceTree = "<group>"; };
 		B155D18CBF0E83626A763726 /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
 		C97A2A7109452E28AE6222AB /* TapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapApp.swift; sourceTree = "<group>"; };
+		CAC4346394B39D982C10B6C3 /* NotificationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewController.swift; sourceTree = "<group>"; };
 		CE481AD2DDD054697F059FD3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		D6BE5375BC66761D40169ABA /* ReminderDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderDetailView.swift; sourceTree = "<group>"; };
 		D71A25B88A9EDF68ACFF24FC /* SavedPlace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlace.swift; sourceTree = "<group>"; };
 		E418E627F79C537B0B557543 /* tap-urgent.caf */ = {isa = PBXFileReference; path = "tap-urgent.caf"; sourceTree = "<group>"; };
 		E6BF5A0D0B7FA76CAC76D5B4 /* RaceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RaceCoordinator.swift; sourceTree = "<group>"; };
+		EFBEFADA670A6B201B3C7392 /* TapNotifContent.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TapNotifContent.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -119,6 +145,7 @@
 		55D1BD90F80FEA52D553314C = {
 			isa = PBXGroup;
 			children = (
+				908423104CEE9F9891586EBB /* NotifContent */,
 				0977C5A140EBC0C7C8D7AED6 /* Tap */,
 				2D9519880498E5C02BDFD449 /* TapUITests */,
 				F0EFBBFFAD0E0A9B14B941C7 /* Products */,
@@ -150,6 +177,15 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		908423104CEE9F9891586EBB /* NotifContent */ = {
+			isa = PBXGroup;
+			children = (
+				1868F99D690230CF119426BB /* Info.plist */,
+				CAC4346394B39D982C10B6C3 /* NotificationViewController.swift */,
+			);
+			path = NotifContent;
+			sourceTree = "<group>";
+		};
 		A35373C6B122C0F7BB627C6F /* Support */ = {
 			isa = PBXGroup;
 			children = (
@@ -171,6 +207,7 @@
 			isa = PBXGroup;
 			children = (
 				4A3059A7481A1BD40C19CD6A /* Tap.app */,
+				EFBEFADA670A6B201B3C7392 /* TapNotifContent.appex */,
 				752DABEAC06148DB0D63660C /* TapUITests.xctest */,
 			);
 			name = Products;
@@ -207,16 +244,35 @@
 			productReference = 752DABEAC06148DB0D63660C /* TapUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		55C26F4096213A0C8ECE21B6 /* TapNotifContent */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51326157A89C53C633F365CB /* Build configuration list for PBXNativeTarget "TapNotifContent" */;
+			buildPhases = (
+				267FA0F74705A11FAC5F83CE /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TapNotifContent;
+			packageProductDependencies = (
+			);
+			productName = TapNotifContent;
+			productReference = EFBEFADA670A6B201B3C7392 /* TapNotifContent.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		A061BB0CACD0836AF3A4D360 /* Tap */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0D72A660502516AB53237CFD /* Build configuration list for PBXNativeTarget "Tap" */;
 			buildPhases = (
 				D16EE36D283D61D855C70B22 /* Sources */,
 				BA5E6AF9AE3282CCCBD4FE49 /* Resources */,
+				19C1E4306D557C4A5650A375 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A8D9216864C3D07AFC7B573F /* PBXTargetDependency */,
 			);
 			name = Tap;
 			packageProductDependencies = (
@@ -236,6 +292,9 @@
 				TargetAttributes = {
 					317A1D180198B26089731790 = {
 						TestTargetID = A061BB0CACD0836AF3A4D360;
+					};
+					55C26F4096213A0C8ECE21B6 = {
+						ProvisioningStyle = Automatic;
 					};
 					A061BB0CACD0836AF3A4D360 = {
 						ProvisioningStyle = Automatic;
@@ -257,6 +316,7 @@
 			projectRoot = "";
 			targets = (
 				A061BB0CACD0836AF3A4D360 /* Tap */,
+				55C26F4096213A0C8ECE21B6 /* TapNotifContent */,
 				317A1D180198B26089731790 /* TapUITests */,
 			);
 		};
@@ -276,6 +336,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		267FA0F74705A11FAC5F83CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				353E478225A35475923341C6 /* NotificationViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BA0A4ECA958673CDE622C044 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -309,6 +377,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A8D9216864C3D07AFC7B573F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 55C26F4096213A0C8ECE21B6 /* TapNotifContent */;
+			targetProxy = B5F2C130B8412866559EE7F8 /* PBXContainerItemProxy */;
+		};
 		C1E4473829EB426FE40DC078 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A061BB0CACD0836AF3A4D360 /* Tap */;
@@ -416,6 +489,48 @@
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
+		};
+		77A94B7E0888CB54554B06E5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NotifContent/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tap.reminders.notifcontent;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9AAA4C72D276960F2B8158A1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NotifContent/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tap.reminders.notifcontent;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		B3D40635959F2C116FDEB7A2 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -532,6 +647,15 @@
 			buildConfigurations = (
 				33906EC08C23318E3595E106 /* Debug */,
 				CC60801F265A4CD9DEC6FBCB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		51326157A89C53C633F365CB /* Build configuration list for PBXNativeTarget "TapNotifContent" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AAA4C72D276960F2B8158A1 /* Debug */,
+				77A94B7E0888CB54554B06E5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

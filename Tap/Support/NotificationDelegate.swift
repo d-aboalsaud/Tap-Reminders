@@ -10,6 +10,9 @@ final class AppRouter: ObservableObject {
     @Published var selectedTab: Int = 0
     /// Bumped to ask the capture screen to focus its text field (fast-capture reset).
     @Published var captureFocusRequest: UUID?
+    /// Set when the user interacted with a notification — suppresses the
+    /// fast-capture reset that would otherwise steal the navigation.
+    var lastNotificationInteraction: Date?
 }
 
 /// UNUserNotificationCenter delegate: shows banners while the app is in the
@@ -55,6 +58,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     ) async {
         let userInfo = response.notification.request.content.userInfo
         let reminderID = (userInfo["reminderID"] as? String).flatMap(UUID.init(uuidString:))
+        await MainActor.run { AppRouter.shared.lastNotificationInteraction = .now }
 
         switch response.actionIdentifier {
         case Self.doneActionID:

@@ -40,11 +40,19 @@ struct TapApp: App {
                         // Fast-capture reset: away long enough means the user is
                         // back to add something — land them typing. Quick app
                         // switches and notification taps keep their context.
+                        // Delayed re-check: a notification tap's routing can land
+                        // AFTER the scene becomes active — it must win.
                         if let away = backgroundedAt,
-                           Date.now.timeIntervalSince(away) > Self.captureResetAfter,
-                           AppRouter.shared.pendingReminderID == nil {
-                            AppRouter.shared.selectedTab = 0
-                            AppRouter.shared.captureFocusRequest = UUID()
+                           Date.now.timeIntervalSince(away) > Self.captureResetAfter {
+                            Task { @MainActor in
+                                try? await Task.sleep(for: .milliseconds(700))
+                                let router = AppRouter.shared
+                                guard router.pendingReminderID == nil else { return }
+                                if let tapped = router.lastNotificationInteraction,
+                                   Date.now.timeIntervalSince(tapped) < 5 { return }
+                                router.selectedTab = 0
+                                router.captureFocusRequest = UUID()
+                            }
                         }
                         backgroundedAt = nil
                     case .background:

@@ -143,6 +143,25 @@ final class TapUITests: XCTestCase {
         dismissDetailSheet()
     }
 
+    func test7_notificationTapOpensReminder() throws {
+        typeCapture("notif tap check in 1 minute")
+        XCTAssertTrue(app.navigationBars["Edit"].waitForExistence(timeout: 4))
+        dismissDetailSheet()
+        app.terminate()
+
+        let banner = springboard.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS[c] 'notif tap check'"))
+            .firstMatch
+        XCTAssertTrue(banner.waitForExistence(timeout: 90), "notification never appeared")
+        banner.tap()
+
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10), "app did not open from tap")
+        XCTAssertTrue(
+            app.navigationBars["Edit"].waitForExistence(timeout: 8),
+            "tap opened the app but not the reminder's page"
+        )
+    }
+
     func test8_voiceOrbDiagnostic() throws {
         func snap(_ name: String) {
             let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())

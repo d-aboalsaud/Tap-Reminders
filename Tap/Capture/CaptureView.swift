@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Combine
 
 /// The capture screen. Sub-3-second philosophy: auto-commit, no confirm screen.
 /// Live chips under the input show what the parser understood in real time;
@@ -16,7 +17,17 @@ struct CaptureView: View {
     @State private var text = ""
     @State private var isUrgent = false
     @State private var justSaved: Reminder?
+    @State private var hintIndex = 0
     @FocusState private var textFocused: Bool
+
+    private static let hints = [
+        "buy milk at 6pm",
+        "call mom when I get to Home",
+        "take the trash out when I leave Home",
+        "pay the bill in 20 minutes",
+        "gym tomorrow at 7pm !!",
+    ]
+    private let hintTimer = Timer.publish(every: 3.5, on: .main, in: .common).autoconnect()
 
     private var mode: CaptureMode {
         CaptureMode(rawValue: lastModeRaw) ?? .text
@@ -39,6 +50,18 @@ struct CaptureView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
+                HStack {
+                    Text("Tap.")
+                        .font(.system(size: 40, weight: .heavy, design: .rounded))
+                        .foregroundStyle(LinearGradient(
+                            colors: [.tapIndigo, .tapBlue],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
+                    Spacer()
+                }
+                .padding(.top, 8)
+
                 Spacer()
 
                 if mode == .voice {
@@ -108,12 +131,17 @@ struct CaptureView: View {
                         .transition(.scale.combined(with: .opacity))
                 }
                 if let date = preview.fireDate {
-                    ConditionChip(
-                        icon: "clock.fill",
-                        text: date.formatted(date: Calendar.current.isDateInToday(date) ? .omitted : .abbreviated,
-                                             time: .shortened)
-                    )
-                    .transition(.scale.combined(with: .opacity))
+                    if preview.repeatRule != .none {
+                        ConditionChip(icon: "repeat", text: preview.repeatRule.chipText(for: date))
+                            .transition(.scale.combined(with: .opacity))
+                    } else {
+                        ConditionChip(
+                            icon: "clock.fill",
+                            text: date.formatted(date: Calendar.current.isDateInToday(date) ? .omitted : .abbreviated,
+                                                 time: .shortened)
+                        )
+                        .transition(.scale.combined(with: .opacity))
+                    }
                 }
                 if let place = preview.savedPlace {
                     ConditionChip(
@@ -174,7 +202,13 @@ struct CaptureView: View {
 
     private var textUI: some View {
         VStack(spacing: 16) {
-            TextField("buy milk at 6pm · call mom at Home", text: $text)
+            TextField(Self.hints[hintIndex], text: $text)
+                .onReceive(hintTimer) { _ in
+                    guard text.isEmpty else { return }
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        hintIndex = (hintIndex + 1) % Self.hints.count
+                    }
+                }
                 .font(.title3)
                 .textFieldStyle(.plain)
                 .accessibilityIdentifier("captureField")
@@ -267,6 +301,7 @@ struct CaptureView: View {
             savedPlace: parsed.savedPlace,
             triggerType: parsed.triggerType
         )
+        reminder.repeatRule = parsed.repeatRule
         context.insert(reminder)
         try? context.save()
         RaceCoordinator.activate(reminder, geofence: geofence)

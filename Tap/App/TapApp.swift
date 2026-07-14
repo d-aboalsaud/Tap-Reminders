@@ -91,6 +91,7 @@ struct RootView: View {
                 .tabItem { Label("Places", systemImage: "mappin.and.ellipse") }
                 .tag(2)
         }
+        .fontDesign(.rounded)
         .preferredColorScheme(
             (AppearanceMode(rawValue: appearanceModeRaw) ?? .system).colorScheme
         )

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import MapKit
 
 struct SavedPlacesView: View {
     @Environment(\.modelContext) private var context
@@ -26,11 +27,26 @@ struct SavedPlacesView: View {
                     Button {
                         editingPlace = place
                     } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(place.name).foregroundStyle(.primary)
-                            Text("Radius \(Int(place.radius)) m · \(affectedReminders(for: place).count) reminder(s)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        HStack(spacing: 12) {
+                            Map(initialPosition: .region(MKCoordinateRegion(
+                                center: place.coordinate,
+                                latitudinalMeters: place.radius * 5,
+                                longitudinalMeters: place.radius * 5
+                            ))) {
+                                Marker(place.name, coordinate: place.coordinate)
+                                    .tint(Color.tapBlue)
+                            }
+                            .frame(width: 56, height: 56)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .allowsHitTesting(false)
+                            .id("\(place.latitude)-\(place.longitude)")
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(place.name).foregroundStyle(.primary)
+                                Text("Radius \(Int(place.radius)) m · \(affectedReminders(for: place).count) reminder(s)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                     .swipeActions {

@@ -7,6 +7,7 @@ struct ParsedCapture {
     var fireDate: Date?
     var savedPlace: SavedPlace?
     var triggerType: LocationTriggerType?
+    var repeatRule: RepeatRule = .none
 
     var hasCondition: Bool { fireDate != nil || savedPlace != nil }
 
@@ -25,6 +26,9 @@ struct ParsedCapture {
         case let (time?, place?):
             return "I'll ping you for whichever comes first: \(time), or \(place)."
         case let (time?, nil):
+            if repeatRule != .none, let date = fireDate {
+                return "I'll remind you \(repeatRule.chipText(for: date).lowercased())."
+            }
             return "I'll remind you \(time)."
         case let (nil, place?):
             return "I'll remind you \(place)."
@@ -61,28 +65,119 @@ enum CaptureParser {
             text.removeSubrange(range)
         }
 
+        // Recurrence ("every day", "every monday", "daily") — detected before
+        // the date so its phrase can be stripped and its weekday anchors the date.
+        let repeatMatch = matchRepeat(in: text, now: now)
+
         let locationMatch = matchLocation(in: text, savedPlaces: savedPlaces)
         let dateMatch = matchRelativeDuration(in: text, now: now, excluding: locationMatch?.2)
             ?? matchDate(in: text, now: now, excluding: locationMatch?.2)
 
-        // Strip both condition phrases from the content, later range first so
-        // the earlier range's indices stay valid.
+        // Anchor the fire date: explicit time wins; a weekly rule shifts it to
+        // its weekday; a rule with no time at all defaults to 9 AM.
+        var fireDate = dateMatch?.0
+        var repeatRule = RepeatRule.none
+        if let repeatMatch {
+            repeatRule = repeatMatch.rule
+            fireDate = anchorDate(
+                rule: repeatMatch.rule,
+                weekday: repeatMatch.weekday,
+                time: fireDate,
+                now: now
+            )
+        }
+
+        // Strip condition phrases from the content. Ranges can overlap (the
+        // date detector may swallow part of the repeat phrase), so merge them
+        // as offsets first, then remove back-to-front.
         var content = text
-        let ranges = [locationMatch?.2, dateMatch?.1]
+        let offsets = [locationMatch?.2, dateMatch?.1, repeatMatch?.range]
             .compactMap { $0 }
-            .sorted { $0.lowerBound > $1.lowerBound }
-        for range in ranges {
-            content.removeSubrange(range)
+            .map { (text.distance(from: text.startIndex, to: $0.lowerBound),
+                    text.distance(from: text.startIndex, to: $0.upperBound)) }
+            .sorted { $0.0 < $1.0 }
+        var merged: [(Int, Int)] = []
+        for range in offsets {
+            if let last = merged.last, range.0 <= last.1 {
+                merged[merged.count - 1].1 = max(last.1, range.1)
+            } else {
+                merged.append(range)
+            }
+        }
+        for (start, end) in merged.reversed() {
+            let si = content.index(content.startIndex, offsetBy: start)
+            let ei = content.index(content.startIndex, offsetBy: end)
+            content.removeSubrange(si..<ei)
         }
         content = cleanContent(content)
 
         return ParsedCapture(
             content: content.isEmpty ? text : content,
             isUrgent: urgent,
-            fireDate: dateMatch?.0,
-            savedPlace: locationMatch?.0,
-            triggerType: locationMatch?.1
+            fireDate: fireDate,
+            savedPlace: repeatRule == .none ? locationMatch?.0 : nil,
+            triggerType: repeatRule == .none ? locationMatch?.1 : nil,
+            repeatRule: repeatRule
         )
+    }
+
+    // MARK: - Recurrence matching
+
+    private static let weekdayNames = [
+        "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4,
+        "thursday": 5, "friday": 6, "saturday": 7,
+    ]
+
+    private static func matchRepeat(
+        in text: String,
+        now: Date
+    ) -> (rule: RepeatRule, weekday: Int?, range: Range<String.Index>)? {
+        let lowered = text.lowercased()
+
+        // "every monday", "every friday"…
+        for (name, weekday) in weekdayNames {
+            if let r = lowered.range(of: "every \(name)") {
+                return (.weekly, weekday, mapRange(r, from: lowered, to: text))
+            }
+        }
+        for (phrase, rule) in [
+            ("every day", RepeatRule.daily), ("everyday", .daily), ("daily", .daily),
+            ("every week", .weekly), ("weekly", .weekly),
+            ("every month", .monthly), ("monthly", .monthly),
+        ] {
+            if let r = lowered.range(of: phrase) {
+                return (rule, nil, mapRange(r, from: lowered, to: text))
+            }
+        }
+        return nil
+    }
+
+    /// Next occurrence matching the rule: keeps the parsed time-of-day (or 9 AM),
+    /// and for weekly rules moves to the requested weekday.
+    private static func anchorDate(rule: RepeatRule, weekday: Int?, time: Date?, now: Date) -> Date {
+        let calendar = Calendar.current
+        var hour = 9, minute = 0
+        if let time {
+            hour = calendar.component(.hour, from: time)
+            minute = calendar.component(.minute, from: time)
+        }
+        var components = DateComponents(hour: hour, minute: minute)
+        if rule == .weekly {
+            components.weekday = weekday ?? calendar.component(.weekday, from: time ?? now)
+        }
+        return calendar.nextDate(
+            after: now, matching: components, matchingPolicy: .nextTime
+        ) ?? now.addingTimeInterval(3600)
+    }
+
+    private static func mapRange(
+        _ range: Range<String.Index>,
+        from lowered: String,
+        to original: String
+    ) -> Range<String.Index> {
+        let start = original.index(original.startIndex, offsetBy: lowered.distance(from: lowered.startIndex, to: range.lowerBound))
+        let end = original.index(original.startIndex, offsetBy: lowered.distance(from: lowered.startIndex, to: range.upperBound))
+        return start..<end
     }
 
     // MARK: - Location matching
@@ -267,7 +362,7 @@ enum CaptureParser {
     private static func cleanContent(_ raw: String) -> String {
         var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         // Strip dangling connectors left after removing the condition phrase.
-        let danglers = ["at", "on", "by", "when", "when i", "to", "and", ","]
+        let danglers = ["at", "on", "by", "when", "when i", "to", "and", ",", "every"]
         var changed = true
         while changed {
             changed = false

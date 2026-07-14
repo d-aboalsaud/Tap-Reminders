@@ -2,6 +2,39 @@ import Foundation
 import SwiftData
 import CoreLocation
 
+enum RepeatRule: String, Codable, CaseIterable, Identifiable {
+    case none
+    case daily
+    case weekly
+    case monthly
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .none: return "Never"
+        case .daily: return "Every day"
+        case .weekly: return "Every week"
+        case .monthly: return "Every month"
+        }
+    }
+
+    /// Chip text, given the reference fire date.
+    func chipText(for date: Date) -> String {
+        let time = date.formatted(date: .omitted, time: .shortened)
+        switch self {
+        case .none: return time
+        case .daily: return "Every day \(time)"
+        case .weekly:
+            let weekday = date.formatted(.dateTime.weekday(.wide))
+            return "Every \(weekday) \(time)"
+        case .monthly:
+            let day = Calendar.current.component(.day, from: date)
+            return "Monthly on day \(day), \(time)"
+        }
+    }
+}
+
 enum LocationTriggerType: String, Codable, CaseIterable, Identifiable {
     case arrive
     case leave
@@ -27,6 +60,7 @@ final class Reminder {
     // Time condition
     var fireDate: Date?
     var timeFired: Bool
+    var repeatRuleRaw: String?
 
     // Location condition: either a saved place reference or an ad-hoc pin
     var savedPlace: SavedPlace?
@@ -71,6 +105,13 @@ final class Reminder {
         set { triggerTypeRaw = newValue?.rawValue }
     }
 
+    var repeatRule: RepeatRule {
+        get { repeatRuleRaw.flatMap(RepeatRule.init(rawValue:)) ?? .none }
+        set { repeatRuleRaw = newValue == .none ? nil : newValue.rawValue }
+    }
+
+    var isRepeating: Bool { repeatRule != .none && hasTimeCondition }
+
     var hasTimeCondition: Bool { fireDate != nil }
 
     var hasLocationCondition: Bool {
@@ -108,6 +149,8 @@ final class Reminder {
     /// and must stay visible in Upcoming.
     var isResolved: Bool {
         if isCompleted { return true }
+        // Repeating reminders keep firing until explicitly completed.
+        if isRepeating { return false }
         guard hasTimeCondition || hasLocationCondition else { return false }
         let timeDone = !hasTimeCondition || timeFired
         let locationDone = !hasLocationCondition || locationFired

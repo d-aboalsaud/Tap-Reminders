@@ -138,7 +138,7 @@ enum RaceCoordinator {
     static func reconcileFiredTimeLegs(context: ModelContext) {
         let all = (try? context.fetch(FetchDescriptor<Reminder>())) ?? []
         var changed = false
-        for reminder in all where reminder.hasTimeCondition && !reminder.timeFired {
+        for reminder in all where reminder.hasTimeCondition && !reminder.timeFired && !reminder.isRepeating {
             if let date = reminder.fireDate, date <= .now {
                 reminder.timeFired = true
                 changed = true

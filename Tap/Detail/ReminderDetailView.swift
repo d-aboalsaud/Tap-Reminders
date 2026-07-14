@@ -24,7 +24,11 @@ struct ReminderDetailView: View {
             }
 
             timeSection
-            locationSection
+            // A repeating reminder is time-driven; location conditions don't mix
+            // with recurrence.
+            if !reminder.isRepeating {
+                locationSection
+            }
 
             if reminder.isRace {
                 Section {
@@ -69,9 +73,17 @@ struct ReminderDetailView: View {
                     in: Date.now...,
                     displayedComponents: [.date, .hourAndMinute]
                 )
+                if !reminder.hasLocationCondition {
+                    Picker("Repeat", selection: repeatBinding) {
+                        ForEach(RepeatRule.allCases) { rule in
+                            Text(rule.label).tag(rule)
+                        }
+                    }
+                }
                 Button("Remove time", role: .destructive) {
                     reminder.fireDate = nil
                     reminder.timeFired = false
+                    reminder.repeatRule = .none
                     persist()
                 }
             } else {
@@ -94,6 +106,17 @@ struct ReminderDetailView: View {
         Binding(
             get: { reminder.fireDate ?? .now.addingTimeInterval(3600) },
             set: { setFireDate($0) }
+        )
+    }
+
+    private var repeatBinding: Binding<RepeatRule> {
+        Binding(
+            get: { reminder.repeatRule },
+            set: {
+                reminder.repeatRule = $0
+                reminder.timeFired = false
+                persist()
+            }
         )
     }
 

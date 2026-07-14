@@ -26,7 +26,7 @@ struct ReminderListView: View {
                     Section("Upcoming") {
                         ForEach(upcoming) { reminder in
                             NavigationLink(value: reminder.id) {
-                                ReminderRow(reminder: reminder)
+                                ReminderRow(reminder: reminder) { complete(reminder) }
                             }
                             .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                 Button {
@@ -43,7 +43,7 @@ struct ReminderListView: View {
                 if !done.isEmpty {
                     Section("Done") {
                         ForEach(done) { reminder in
-                            ReminderRow(reminder: reminder)
+                            ReminderRow(reminder: reminder, onComplete: nil)
                                 .foregroundStyle(.secondary)
                         }
                         .onDelete { deleteReminders(at: $0, from: done) }
@@ -85,8 +85,32 @@ struct ReminderListView: View {
 
 struct ReminderRow: View {
     let reminder: Reminder
+    var onComplete: (() -> Void)?
 
     var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            if let onComplete {
+                Button(action: onComplete) {
+                    Image(systemName: "circle")
+                        .font(.title3)
+                        .foregroundStyle(Color.tapBlue.opacity(0.7))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Complete")
+                .padding(.top, 2)
+            } else if reminder.isResolved {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(.green.opacity(0.8))
+                    .padding(.top, 2)
+            }
+
+            rowContent
+        }
+        .padding(.vertical, 3)
+    }
+
+    private var rowContent: some View {
         VStack(alignment: .leading, spacing: 7) {
             HStack(spacing: 6) {
                 if reminder.isUrgent {
@@ -107,11 +131,15 @@ struct ReminderRow: View {
                     )
                 }
                 if let date = reminder.fireDate {
-                    ConditionChip(
-                        icon: "clock.fill",
-                        text: relativeText(for: date),
-                        fired: reminder.timeFired
-                    )
+                    if reminder.isRepeating {
+                        ConditionChip(icon: "repeat", text: reminder.repeatRule.chipText(for: date))
+                    } else {
+                        ConditionChip(
+                            icon: "clock.fill",
+                            text: relativeText(for: date),
+                            fired: reminder.timeFired
+                        )
+                    }
                 }
                 if reminder.hasLocationCondition {
                     ConditionChip(
@@ -129,7 +157,6 @@ struct ReminderRow: View {
                     .foregroundStyle(.tertiary)
             }
         }
-        .padding(.vertical, 3)
     }
 
     /// "in 3 hours" for upcoming today, otherwise a short absolute date.

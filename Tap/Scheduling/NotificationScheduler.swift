@@ -65,6 +65,10 @@ enum NotificationScheduler {
     /// content (time firing first means it's the info ping); if the location leg
     /// fires first, RaceCoordinator rewrites this pending request to FULL content.
     static func scheduleTimeLeg(for reminder: Reminder) {
+        if reminder.isRepeating {
+            scheduleRepeating(for: reminder)
+            return
+        }
         guard let fireDate = reminder.fireDate, fireDate > .now else { return }
         let content = reminder.isRace
             ? softContent(for: reminder, leg: .time)
@@ -78,6 +82,31 @@ enum NotificationScheduler {
         if !reminder.isRace {
             scheduleNags(for: reminder, startingAt: fireDate)
         }
+    }
+
+    /// Repeating reminders use an iOS repeating calendar trigger — the system
+    /// re-fires them forever until the request is removed.
+    private static func scheduleRepeating(for reminder: Reminder) {
+        guard let fireDate = reminder.fireDate else { return }
+        let calendar = Calendar.current
+        var components = DateComponents()
+        components.hour = calendar.component(.hour, from: fireDate)
+        components.minute = calendar.component(.minute, from: fireDate)
+        switch reminder.repeatRule {
+        case .weekly:
+            components.weekday = calendar.component(.weekday, from: fireDate)
+        case .monthly:
+            components.day = calendar.component(.day, from: fireDate)
+        case .daily, .none:
+            break
+        }
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(
+            identifier: reminder.timeNotificationID,
+            content: fullContent(for: reminder),
+            trigger: trigger
+        )
+        UNUserNotificationCenter.current().add(request)
     }
 
     static func rewriteTimeLegAsFull(for reminder: Reminder) {

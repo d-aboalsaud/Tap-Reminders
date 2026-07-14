@@ -63,6 +63,7 @@ targets:
         INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Tap transcribes your voice to create reminders."
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Tap uses your location to remind you when you arrive at or leave places."
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Tap needs background location access so location reminders fire even when the app is closed."
+        INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: "Tap shows your calendar events next to your reminders. It never changes your calendar."
         INFOPLIST_KEY_UIBackgroundModes: location
         SWIFT_VERSION: 5.9
         TARGETED_DEVICE_FAMILY: 1

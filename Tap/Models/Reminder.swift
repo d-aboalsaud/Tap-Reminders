@@ -144,6 +144,25 @@ final class Reminder {
     /// Stable identifier for the monitored geofence region.
     var regionID: String { "region-\(id.uuidString)" }
 
+    /// Whether this reminder lands on the given day (repeat-rule aware).
+    func occursOn(_ day: Date, calendar: Calendar = .current) -> Bool {
+        guard let fireDate, !isCompleted else { return false }
+        let dayStart = calendar.startOfDay(for: day)
+        let firstDayStart = calendar.startOfDay(for: fireDate)
+        switch repeatRule {
+        case .none:
+            return calendar.isDate(fireDate, inSameDayAs: day)
+        case .daily:
+            return dayStart >= firstDayStart
+        case .weekly:
+            return dayStart >= firstDayStart
+                && calendar.component(.weekday, from: fireDate) == calendar.component(.weekday, from: day)
+        case .monthly:
+            return dayStart >= firstDayStart
+                && calendar.component(.day, from: fireDate) == calendar.component(.day, from: day)
+        }
+    }
+
     /// A reminder is done once every set condition has fired (or it's marked completed).
     /// A reminder with no conditions yet is NOT resolved — it's waiting for setup
     /// and must stay visible in Upcoming.

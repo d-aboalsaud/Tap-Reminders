@@ -87,9 +87,12 @@ struct RootView: View {
             ReminderListView()
                 .tabItem { Label("Reminders", systemImage: "list.bullet") }
                 .tag(1)
+            CalendarView()
+                .tabItem { Label("Calendar", systemImage: "calendar") }
+                .tag(2)
             SavedPlacesView()
                 .tabItem { Label("Places", systemImage: "mappin.and.ellipse") }
-                .tag(2)
+                .tag(3)
         }
         .fontDesign(.rounded)
         .preferredColorScheme(

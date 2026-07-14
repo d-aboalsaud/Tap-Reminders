@@ -204,10 +204,10 @@ struct CaptureView: View {
         VStack(spacing: 16) {
             TextField(Self.hints[hintIndex], text: $text)
                 .onReceive(hintTimer) { _ in
-                    guard text.isEmpty else { return }
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        hintIndex = (hintIndex + 1) % Self.hints.count
-                    }
+                    // Swapping the placeholder while the field is focused can
+                    // drop keyboard focus — only cycle while idle.
+                    guard text.isEmpty, !textFocused else { return }
+                    hintIndex = (hintIndex + 1) % Self.hints.count
                 }
                 .font(.title3)
                 .textFieldStyle(.plain)

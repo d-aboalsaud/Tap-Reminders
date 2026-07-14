@@ -11,9 +11,11 @@
 		0DEE7577825904248CD3BD42 /* VoiceCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B910E2C9B228A7B506DCA2 /* VoiceCaptureController.swift */; };
 		1229BAB1FFC58CFADAE3F9A7 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE481AD2DDD054697F059FD3 /* Theme.swift */; };
 		14932FFE779987D6BD30800C /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B155D18CBF0E83626A763726 /* NotificationScheduler.swift */; };
+		34EF78515A299918D5F2682C /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A93CAA624B2EA63D2FBBC52 /* CalendarView.swift */; };
 		353E478225A35475923341C6 /* NotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC4346394B39D982C10B6C3 /* NotificationViewController.swift */; };
 		3AE9BE6E8F13A5FACE0F489F /* TapNotifContent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EFBEFADA670A6B201B3C7392 /* TapNotifContent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5B908B17CF754C12A27AB0FB /* GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20BBCDE1E9B1BDB896458AF5 /* GeofenceManager.swift */; };
+		630F94B2AC418BD890D5B84C /* EventKitProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048C9071B94643913FC3D357 /* EventKitProvider.swift */; };
 		7B83BCDE6A61A5725BC5B70E /* TapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97A2A7109452E28AE6222AB /* TapApp.swift */; };
 		8DABFE161130BAF5D414ACB3 /* TapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC6E154E305F208CD661293 /* TapUITests.swift */; };
 		8E1F366FAF793069D70CE819 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10B8334FCCB3F1C383A913F2 /* Assets.xcassets */; };
@@ -62,6 +64,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		048C9071B94643913FC3D357 /* EventKitProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitProvider.swift; sourceTree = "<group>"; };
 		10B8334FCCB3F1C383A913F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1110CAD8527860A594C73697 /* ReminderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderListView.swift; sourceTree = "<group>"; };
 		1868F99D690230CF119426BB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -73,6 +76,7 @@
 		752DABEAC06148DB0D63660C /* TapUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TapUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AD10749ACF6DD25816EB399 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
 		95B910E2C9B228A7B506DCA2 /* VoiceCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCaptureController.swift; sourceTree = "<group>"; };
+		9A93CAA624B2EA63D2FBBC52 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		9FC6E154E305F208CD661293 /* TapUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapUITests.swift; sourceTree = "<group>"; };
 		A4136CEC4BEAAE9FAEF1C5C6 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
 		A7BC1EE2375096A19026E942 /* tap-chime.caf */ = {isa = PBXFileReference; path = "tap-chime.caf"; sourceTree = "<group>"; };
@@ -104,6 +108,7 @@
 			children = (
 				10B8334FCCB3F1C383A913F2 /* Assets.xcassets */,
 				882226FA892B9DB7E414A0CF /* App */,
+				6A704F9EF5E7F6C6BC6B9F82 /* Calendar */,
 				F3CECB094D46516B949AC68C /* Capture */,
 				DA56223C0F7C112D09F72BDD /* Detail */,
 				84C292B9B72EE69F7AC75966 /* List */,
@@ -159,6 +164,15 @@
 				E418E627F79C537B0B557543 /* tap-urgent.caf */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		6A704F9EF5E7F6C6BC6B9F82 /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				9A93CAA624B2EA63D2FBBC52 /* CalendarView.swift */,
+				048C9071B94643913FC3D357 /* EventKitProvider.swift */,
+			);
+			path = Calendar;
 			sourceTree = "<group>";
 		};
 		84C292B9B72EE69F7AC75966 /* List */ = {
@@ -356,8 +370,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34EF78515A299918D5F2682C /* CalendarView.swift in Sources */,
 				E2CBC46260F0CBD903007158 /* CaptureParser.swift in Sources */,
 				0586E5BF0895BCF49D29D861 /* CaptureView.swift in Sources */,
+				630F94B2AC418BD890D5B84C /* EventKitProvider.swift in Sources */,
 				5B908B17CF754C12A27AB0FB /* GeofenceManager.swift in Sources */,
 				F0929070B1458E0CD4818E43 /* NotificationDelegate.swift in Sources */,
 				14932FFE779987D6BD30800C /* NotificationScheduler.swift in Sources */,
@@ -415,6 +431,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Tap shows your calendar events next to your reminders. It never changes your calendar.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Tap needs background location access so location reminders fire even when the app is closed.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Tap uses your location to remind you when you arrive at or leave places.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Tap uses the microphone so you can capture reminders by voice.";
@@ -620,6 +637,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Tap shows your calendar events next to your reminders. It never changes your calendar.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Tap needs background location access so location reminders fire even when the app is closed.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Tap uses your location to remind you when you arrive at or leave places.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Tap uses the microphone so you can capture reminders by voice.";

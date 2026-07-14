@@ -23,7 +23,9 @@ final class TapUITests: XCTestCase {
             let candidates = [
                 "Allow While Using App",
                 "Keep Only While Using",
+                "Allow Full Access",
                 "Allow",
+                "OK",
             ]
             var tapped = false
             for label in candidates {
@@ -231,6 +233,11 @@ final class TapUITests: XCTestCase {
         goToTab("Places")
         sleep(1)
         snap("4-places")
+
+        goToTab("Calendar")
+        dismissSystemAlerts()
+        sleep(1)
+        snap("5-calendar")
     }
 
     func test5_deletePlaceWarnsAboutAffectedReminders() throws {

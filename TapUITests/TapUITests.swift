@@ -230,6 +230,10 @@ final class TapUITests: XCTestCase {
         sleep(1)
         snap("3-list")
 
+        goToTab("Calendar")
+        sleep(1)
+        snap("3b-calendar")
+
         goToTab("Places")
         sleep(1)
         snap("4-places")

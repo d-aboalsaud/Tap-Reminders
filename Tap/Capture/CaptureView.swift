@@ -83,7 +83,7 @@ struct CaptureView: View {
             .padding()
             .contentShape(Rectangle())
             .onTapGesture { textFocused = false }
-            .navigationTitle("Tap.")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {

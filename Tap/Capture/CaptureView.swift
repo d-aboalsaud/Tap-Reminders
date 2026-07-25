@@ -143,6 +143,13 @@ struct CaptureView: View {
                         .transition(.scale.combined(with: .opacity))
                     }
                 }
+                if let minutes = preview.intervalMinutes {
+                    ConditionChip(
+                        icon: "timer",
+                        text: minutes % 60 == 0 ? "Every \(minutes / 60)h" : "Every \(minutes)m"
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                }
                 if let place = preview.savedPlace {
                     ConditionChip(
                         icon: "mappin.circle.fill",
@@ -302,6 +309,7 @@ struct CaptureView: View {
             triggerType: parsed.triggerType
         )
         reminder.repeatRule = parsed.repeatRule
+        reminder.intervalMinutes = parsed.intervalMinutes
         context.insert(reminder)
         try? context.save()
         RaceCoordinator.activate(reminder, geofence: geofence)

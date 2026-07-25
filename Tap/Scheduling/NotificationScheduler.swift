@@ -65,6 +65,10 @@ enum NotificationScheduler {
     /// content (time firing first means it's the info ping); if the location leg
     /// fires first, RaceCoordinator rewrites this pending request to FULL content.
     static func scheduleTimeLeg(for reminder: Reminder) {
+        if reminder.isInterval {
+            scheduleInterval(for: reminder)
+            return
+        }
         if reminder.isRepeating {
             scheduleRepeating(for: reminder)
             return
@@ -109,6 +113,43 @@ enum NotificationScheduler {
         UNUserNotificationCenter.current().add(request)
     }
 
+    /// Interval reminders fire every `intervalMinutes` within active hours.
+    /// iOS has no native "every N minutes between X and Y" trigger, so we
+    /// schedule one daily-repeating calendar notification per slot in the window.
+    private static let intervalSlotCap = 24
+    private static func scheduleInterval(for reminder: Reminder) {
+        guard let interval = reminder.intervalMinutes, interval >= 1 else { return }
+        let startMinutes = reminder.activeStartHour * 60
+        let endMinutes = reminder.activeEndHour * 60
+        guard endMinutes > startMinutes else { return }
+        let center = UNUserNotificationCenter.current()
+        var slot = startMinutes
+        var index = 0
+        // Cap the number of slots to stay well under iOS's 64 pending limit.
+        while slot <= endMinutes && index < intervalSlotCap {
+            var components = DateComponents()
+            components.hour = slot / 60
+            components.minute = slot % 60
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+            center.add(UNNotificationRequest(
+                identifier: intervalSlotID(reminder.id, index),
+                content: fullContent(for: reminder),
+                trigger: trigger
+            ))
+            slot += interval
+            index += 1
+        }
+    }
+
+    private static func intervalSlotID(_ id: UUID, _ index: Int) -> String {
+        "interval-\(id.uuidString)-\(index)"
+    }
+
+    static func cancelIntervalSlots(reminderID: UUID) {
+        let ids = (0..<intervalSlotCap).map { intervalSlotID(reminderID, $0) }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+    }
+
     static func rewriteTimeLegAsFull(for reminder: Reminder) {
         guard let fireDate = reminder.fireDate, fireDate > .now else { return }
         cancelTimeLeg(for: reminder)
@@ -118,12 +159,14 @@ enum NotificationScheduler {
 
     static func cancelTimeLeg(for reminder: Reminder) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [reminder.timeNotificationID])
+        cancelIntervalSlots(reminderID: reminder.id)
     }
 
     static func cancelAll(for reminder: Reminder) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: [reminder.timeNotificationID, reminder.locationNotificationID]
         )
+        cancelIntervalSlots(reminderID: reminder.id)
         cancelNags(reminderID: reminder.id)
     }
 

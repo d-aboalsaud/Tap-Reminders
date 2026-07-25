@@ -62,6 +62,11 @@ final class Reminder {
     var timeFired: Bool
     var repeatRuleRaw: String?
 
+    // Interval condition: fire every `intervalMinutes` within active hours.
+    var intervalMinutes: Int?
+    var activeStartHour: Int = 9
+    var activeEndHour: Int = 22
+
     // Location condition: either a saved place reference or an ad-hoc pin
     var savedPlace: SavedPlace?
     var adHocLatitude: Double?
@@ -110,9 +115,27 @@ final class Reminder {
         set { repeatRuleRaw = newValue == .none ? nil : newValue.rawValue }
     }
 
-    var isRepeating: Bool { repeatRule != .none && hasTimeCondition }
+    var isRepeating: Bool { repeatRule != .none && fireDate != nil }
 
-    var hasTimeCondition: Bool { fireDate != nil }
+    /// Fires repeatedly through the day (e.g. water reminders).
+    var isInterval: Bool { intervalMinutes != nil }
+
+    /// Any kind of recurrence — never auto-resolves, "Done" acknowledges one hit.
+    var recurs: Bool { isRepeating || isInterval }
+
+    var hasTimeCondition: Bool { fireDate != nil || isInterval }
+
+    /// Chip/label for an interval reminder, e.g. "Every 2h · 9 AM–10 PM".
+    var intervalChipText: String? {
+        guard let minutes = intervalMinutes else { return nil }
+        let every = minutes % 60 == 0 ? "Every \(minutes / 60)h" : "Every \(minutes)m"
+        return "\(every) · \(Self.hourLabel(activeStartHour))–\(Self.hourLabel(activeEndHour))"
+    }
+
+    static func hourLabel(_ hour: Int) -> String {
+        let date = Calendar.current.date(bySettingHour: hour % 24, minute: 0, second: 0, of: .now) ?? .now
+        return date.formatted(.dateTime.hour())
+    }
 
     var hasLocationCondition: Bool {
         savedPlace != nil || (adHocLatitude != nil && adHocLongitude != nil)
@@ -146,7 +169,12 @@ final class Reminder {
 
     /// Whether this reminder lands on the given day (repeat-rule aware).
     func occursOn(_ day: Date, calendar: Calendar = .current) -> Bool {
-        guard let fireDate, !isCompleted else { return false }
+        guard !isCompleted else { return false }
+        // Interval reminders fire every day from when they were created.
+        if isInterval {
+            return calendar.startOfDay(for: day) >= calendar.startOfDay(for: createdAt)
+        }
+        guard let fireDate else { return false }
         let dayStart = calendar.startOfDay(for: day)
         let firstDayStart = calendar.startOfDay(for: fireDate)
         switch repeatRule {
@@ -168,8 +196,8 @@ final class Reminder {
     /// and must stay visible in Upcoming.
     var isResolved: Bool {
         if isCompleted { return true }
-        // Repeating reminders keep firing until explicitly completed.
-        if isRepeating { return false }
+        // Recurring reminders keep firing until explicitly completed.
+        if recurs { return false }
         guard hasTimeCondition || hasLocationCondition else { return false }
         let timeDone = !hasTimeCondition || timeFired
         let locationDone = !hasLocationCondition || locationFired

@@ -23,11 +23,15 @@ struct ReminderDetailView: View {
                 }
             }
 
-            timeSection
-            // A repeating reminder is time-driven; location conditions don't mix
-            // with recurrence.
-            if !reminder.isRepeating {
-                locationSection
+            if reminder.isInterval {
+                intervalSection
+            } else {
+                timeSection
+                // A repeating reminder is time-driven; location conditions don't
+                // mix with recurrence.
+                if !reminder.isRepeating {
+                    locationSection
+                }
             }
 
             if reminder.isRace {
@@ -60,6 +64,64 @@ struct ReminderDetailView: View {
         .sheet(isPresented: $showLocationEditor) {
             LocationConditionEditor(reminder: reminder) { persist() }
         }
+    }
+
+    // MARK: - Interval
+
+    private static let intervalChoices: [(String, Int)] = [
+        ("Every 30 min", 30), ("Every hour", 60), ("Every 2 hours", 120),
+        ("Every 3 hours", 180), ("Every 4 hours", 240),
+    ]
+
+    private var intervalSection: some View {
+        Section("Repeats through the day") {
+            Picker("How often", selection: intervalBinding) {
+                ForEach(Self.intervalChoices, id: \.1) { label, minutes in
+                    Text(label).tag(minutes)
+                }
+            }
+            Picker("Start", selection: activeStartBinding) {
+                ForEach(0..<24) { hour in
+                    Text(Reminder.hourLabel(hour)).tag(hour)
+                }
+            }
+            Picker("End", selection: activeEndBinding) {
+                ForEach(0..<24) { hour in
+                    Text(Reminder.hourLabel(hour)).tag(hour)
+                }
+            }
+            Text("Fires from \(Reminder.hourLabel(reminder.activeStartHour)) to \(Reminder.hourLabel(reminder.activeEndHour)), so it won't wake you at night.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var intervalBinding: Binding<Int> {
+        Binding(
+            get: { reminder.intervalMinutes ?? 120 },
+            set: { reminder.intervalMinutes = $0; persist() }
+        )
+    }
+
+    private var activeStartBinding: Binding<Int> {
+        Binding(
+            get: { reminder.activeStartHour },
+            set: {
+                reminder.activeStartHour = $0
+                if reminder.activeEndHour <= $0 { reminder.activeEndHour = min($0 + 1, 23) }
+                persist()
+            }
+        )
+    }
+
+    private var activeEndBinding: Binding<Int> {
+        Binding(
+            get: { reminder.activeEndHour },
+            set: {
+                reminder.activeEndHour = max($0, reminder.activeStartHour + 1)
+                persist()
+            }
+        )
     }
 
     // MARK: - Time

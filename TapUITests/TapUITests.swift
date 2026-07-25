@@ -119,6 +119,28 @@ final class TapUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["buy milk"].waitForExistence(timeout: 3), "reminder missing from list")
     }
 
+    func test2b_intervalReminderCapture() throws {
+        typeCapture("drink water every 2 hours")
+
+        XCTAssertTrue(app.navigationBars["Edit"].waitForExistence(timeout: 4), "detail sheet did not open")
+        // Interval reminders show the "Repeats through the day" section.
+        XCTAssertTrue(
+            app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] 'Repeats through the day'")).firstMatch
+                .waitForExistence(timeout: 2),
+            "interval section missing on detail page"
+        )
+        let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        shot.name = "interval-detail"
+        shot.lifetime = .keepAlways
+        add(shot)
+        dismissDetailSheet()
+
+        goToTab("Reminders")
+        XCTAssertTrue(app.staticTexts["drink water"].waitForExistence(timeout: 3), "interval reminder missing from list")
+        let intervalChip = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] 'Every 2h'")).firstMatch
+        XCTAssertTrue(intervalChip.waitForExistence(timeout: 2), "interval chip missing in list")
+    }
+
     func test3_bothConditionsCreateRaceReminder() throws {
         typeCapture("call dad at 6pm when I leave Work")
 

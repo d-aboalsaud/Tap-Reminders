@@ -8,8 +8,9 @@ struct ParsedCapture {
     var savedPlace: SavedPlace?
     var triggerType: LocationTriggerType?
     var repeatRule: RepeatRule = .none
+    var intervalMinutes: Int? = nil
 
-    var hasCondition: Bool { fireDate != nil || savedPlace != nil }
+    var hasCondition: Bool { fireDate != nil || savedPlace != nil || intervalMinutes != nil }
 
     /// Short sentence spoken back after voice capture.
     var spokenConfirmation: String {
@@ -21,6 +22,12 @@ struct ParsedCapture {
             formatter.dateStyle = Calendar.current.isDateInToday(date) ? .none : .medium
             formatter.timeStyle = .short
             return "at " + formatter.string(from: date)
+        }
+        if let minutes = intervalMinutes {
+            let every = minutes == 60 ? "every hour"
+                : minutes % 60 == 0 ? "every \(minutes / 60) hours"
+                : "every \(minutes) minutes"
+            return "I'll remind you \(every) during the day."
         }
         switch (timePhrase, placePhrase) {
         case let (time?, place?):
@@ -63,6 +70,23 @@ enum CaptureParser {
             options: [.regularExpression, .caseInsensitive]
         ) {
             text.removeSubrange(range)
+        }
+
+        // Interval ("every 2 hours", "every 30 minutes") — a distinct kind of
+        // recurrence that fires all day; defaults to 9am–10pm, editable later.
+        if let interval = matchInterval(in: text) {
+            var content = text
+            content.removeSubrange(interval.range)
+            content = cleanContent(content)
+            return ParsedCapture(
+                content: content.isEmpty ? text : content,
+                isUrgent: urgent,
+                fireDate: nil,
+                savedPlace: nil,
+                triggerType: nil,
+                repeatRule: .none,
+                intervalMinutes: interval.minutes
+            )
         }
 
         // Recurrence ("every day", "every monday", "daily") — detected before
@@ -127,6 +151,30 @@ enum CaptureParser {
         "sunday": 1, "monday": 2, "tuesday": 3, "wednesday": 4,
         "thursday": 5, "friday": 6, "saturday": 7,
     ]
+
+    /// "every 2 hours", "every 30 minutes", "every hour", "every half hour".
+    private static func matchInterval(in text: String) -> (minutes: Int, range: Range<String.Index>)? {
+        let lowered = text.lowercased()
+        for (phrase, minutes) in [
+            ("every half an hour", 30), ("every half hour", 30),
+            ("every hour", 60), ("every minute", 1),
+        ] {
+            if let r = lowered.range(of: phrase) {
+                return (minutes, mapRange(r, from: lowered, to: text))
+            }
+        }
+        // "every N hours/minutes" with an explicit number.
+        let pattern = #"every\s+(\d+)\s*(hours?|hrs?|h|minutes?|mins?|m)\b"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+              let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+              let full = Range(match.range, in: text),
+              let numRange = Range(match.range(at: 1), in: text),
+              let unitRange = Range(match.range(at: 2), in: text),
+              let n = Int(text[numRange]), n >= 1
+        else { return nil }
+        let isHours = text[unitRange].lowercased().hasPrefix("h")
+        return (isHours ? n * 60 : n, full)
+    }
 
     private static func matchRepeat(
         in text: String,

@@ -106,9 +106,9 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         let context = container.mainContext
         let all = (try? context.fetch(FetchDescriptor<Reminder>())) ?? []
         guard let reminder = all.first(where: { $0.id == id }) else { return }
-        // Done on ONE occurrence of a repeating reminder acknowledges it without
+        // Done on ONE occurrence of a recurring reminder acknowledges it without
         // killing the recurrence; stopping it is done from the app.
-        guard !reminder.isRepeating else {
+        guard !reminder.recurs else {
             NotificationScheduler.cancelNags(reminderID: reminder.id)
             return
         }

@@ -130,7 +130,9 @@ struct ReminderRow: View {
                         tint: .tapWarning
                     )
                 }
-                if let date = reminder.fireDate {
+                if let intervalText = reminder.intervalChipText {
+                    ConditionChip(icon: "timer", text: intervalText)
+                } else if let date = reminder.fireDate {
                     if reminder.isRepeating {
                         ConditionChip(icon: "repeat", text: reminder.repeatRule.chipText(for: date))
                     } else {

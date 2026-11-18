@@ -51,13 +51,7 @@ struct CaptureView: View {
         NavigationStack {
             VStack(spacing: 24) {
                 HStack {
-                    Text("Tap.")
-                        .font(.system(size: 40, weight: .heavy, design: .rounded))
-                        .foregroundStyle(LinearGradient(
-                            colors: [.tapIndigo, .tapBlue],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ))
+                    WaqtLogo(size: 40, textColor: .tapIndigo, pinColor: .tapBlue)
                     Spacer()
                 }
                 .padding(.top, 8)
@@ -247,7 +241,7 @@ struct CaptureView: View {
             Button {
                 commit(text, spoken: false)
             } label: {
-                Label("Tap.", systemImage: "arrow.up.circle.fill")
+                Label("Save", systemImage: "arrow.up.circle.fill")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)

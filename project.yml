@@ -25,6 +25,7 @@ targets:
     platform: iOS
     sources:
       - path: NotifContent
+      - path: Tap/Support/WaqtLogo.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tap.reminders.notifcontent
@@ -61,12 +62,13 @@ targets:
         CURRENT_PROJECT_VERSION: 1
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Waqt
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
-        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Tap uses the microphone so you can capture reminders by voice."
-        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Tap transcribes your voice to create reminders."
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Tap uses your location to remind you when you arrive at or leave places."
-        INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Tap needs background location access so location reminders fire even when the app is closed."
-        INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: "Tap shows your calendar events next to your reminders. It never changes your calendar."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Waqt uses the microphone so you can capture reminders by voice."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Waqt transcribes your voice to create reminders."
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Waqt uses your location to remind you when you arrive at or leave places."
+        INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Waqt needs background location access so location reminders fire even when the app is closed."
+        INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: "Waqt shows your calendar events next to your reminders. It never changes your calendar."
         INFOPLIST_KEY_UIBackgroundModes: location
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         CODE_SIGN_ENTITLEMENTS: Tap/Tap.entitlements

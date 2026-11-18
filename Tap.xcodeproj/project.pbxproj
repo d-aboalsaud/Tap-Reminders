@@ -434,6 +434,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Tap shows your calendar events next to your reminders. It never changes your calendar.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Tap needs background location access so location reminders fire even when the app is closed.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Tap uses your location to remind you when you arrive at or leave places.";
@@ -642,6 +643,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Tap shows your calendar events next to your reminders. It never changes your calendar.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Tap needs background location access so location reminders fire even when the app is closed.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Tap uses your location to remind you when you arrive at or leave places.";

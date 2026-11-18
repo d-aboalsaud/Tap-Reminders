@@ -1,6 +1,6 @@
-# Tap.
+# Waqt
 
-**Sub-3-second reminder capture.** Say it or type it — Tap parses the time, the place, and the urgency, saves instantly, and gets out of your way.
+**Sub-3-second reminder capture.** Say it or type it — Waqt parses the time, the place, and the urgency, saves instantly, and gets out of your way.
 
 **Website:** [d-aboalsaud.github.io/Tap-Reminders](https://d-aboalsaud.github.io/Tap-Reminders/) · [Privacy Policy](https://d-aboalsaud.github.io/Tap-Reminders/privacy.html)
 

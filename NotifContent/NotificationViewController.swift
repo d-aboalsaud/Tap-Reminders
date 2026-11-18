@@ -4,7 +4,7 @@ import UserNotifications
 import UserNotificationsUI
 
 /// Custom expanded notification view — shown when the user long-presses or
-/// pulls down a Tap. reminder notification.
+/// pulls down a Waqt reminder notification.
 final class NotificationViewController: UIViewController, UNNotificationContentExtension {
 
     private var hosting: UIHostingController<NotificationCard>?
@@ -75,9 +75,7 @@ struct NotificationCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Tap.")
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.85))
+                WaqtLogo(size: 15, textColor: .white.opacity(0.85), pinColor: .white.opacity(0.85))
                 Spacer()
                 if urgent {
                     Label("Urgent", systemImage: "flame.fill")

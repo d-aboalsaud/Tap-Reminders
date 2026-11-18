@@ -96,7 +96,7 @@ struct ReminderDetailView: View {
             if let effective = NotificationScheduler.effectiveIntervalMinutes(for: reminder),
                effective != reminder.intervalMinutes {
                 Label(
-                    "iPhone limits how many notifications an app can schedule, so to cover the whole day Tap spaces this one to every \(Self.durationLabel(effective)).",
+                    "iPhone limits how many notifications an app can schedule, so to cover the whole day Waqt spaces this one to every \(Self.durationLabel(effective)).",
                     systemImage: "exclamationmark.triangle.fill"
                 )
                 .font(.footnote)

@@ -13,8 +13,10 @@
 		14932FFE779987D6BD30800C /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B155D18CBF0E83626A763726 /* NotificationScheduler.swift */; };
 		34EF78515A299918D5F2682C /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A93CAA624B2EA63D2FBBC52 /* CalendarView.swift */; };
 		353E478225A35475923341C6 /* NotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAC4346394B39D982C10B6C3 /* NotificationViewController.swift */; };
+		3688F94B14FE50D3077426F3 /* WaqtLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02B44AFC78FAFD000B38140 /* WaqtLogo.swift */; };
 		3AE9BE6E8F13A5FACE0F489F /* TapNotifContent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EFBEFADA670A6B201B3C7392 /* TapNotifContent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5B908B17CF754C12A27AB0FB /* GeofenceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20BBCDE1E9B1BDB896458AF5 /* GeofenceManager.swift */; };
+		5EEDB5BA30F31969FD3B7206 /* WaqtLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02B44AFC78FAFD000B38140 /* WaqtLogo.swift */; };
 		630F94B2AC418BD890D5B84C /* EventKitProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048C9071B94643913FC3D357 /* EventKitProvider.swift */; };
 		7B83BCDE6A61A5725BC5B70E /* TapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97A2A7109452E28AE6222AB /* TapApp.swift */; };
 		8DABFE161130BAF5D414ACB3 /* TapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC6E154E305F208CD661293 /* TapUITests.swift */; };
@@ -83,6 +85,7 @@
 		A7BC1EE2375096A19026E942 /* tap-chime.caf */ = {isa = PBXFileReference; path = "tap-chime.caf"; sourceTree = "<group>"; };
 		ADB4082CDD852F0C10BF2D55 /* Reminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reminder.swift; sourceTree = "<group>"; };
 		B155D18CBF0E83626A763726 /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+		C02B44AFC78FAFD000B38140 /* WaqtLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaqtLogo.swift; sourceTree = "<group>"; };
 		C97A2A7109452E28AE6222AB /* TapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapApp.swift; sourceTree = "<group>"; };
 		CAC4346394B39D982C10B6C3 /* NotificationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewController.swift; sourceTree = "<group>"; };
 		CE481AD2DDD054697F059FD3 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -207,6 +210,7 @@
 			children = (
 				32D4DEE62C325FBCD7267302 /* NotificationDelegate.swift */,
 				CE481AD2DDD054697F059FD3 /* Theme.swift */,
+				C02B44AFC78FAFD000B38140 /* WaqtLogo.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -360,6 +364,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				353E478225A35475923341C6 /* NotificationViewController.swift in Sources */,
+				5EEDB5BA30F31969FD3B7206 /* WaqtLogo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,6 +397,7 @@
 				7B83BCDE6A61A5725BC5B70E /* TapApp.swift in Sources */,
 				1229BAB1FFC58CFADAE3F9A7 /* Theme.swift in Sources */,
 				0DEE7577825904248CD3BD42 /* VoiceCaptureController.swift in Sources */,
+				3688F94B14FE50D3077426F3 /* WaqtLogo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,12 +443,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Waqt;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Tap shows your calendar events next to your reminders. It never changes your calendar.";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Tap needs background location access so location reminders fire even when the app is closed.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Tap uses your location to remind you when you arrive at or leave places.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Tap uses the microphone so you can capture reminders by voice.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Tap transcribes your voice to create reminders.";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Waqt shows your calendar events next to your reminders. It never changes your calendar.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Waqt needs background location access so location reminders fire even when the app is closed.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Waqt uses your location to remind you when you arrive at or leave places.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Waqt uses the microphone so you can capture reminders by voice.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Waqt transcribes your voice to create reminders.";
 				INFOPLIST_KEY_UIBackgroundModes = location;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
@@ -647,12 +654,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Waqt;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Tap shows your calendar events next to your reminders. It never changes your calendar.";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Tap needs background location access so location reminders fire even when the app is closed.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Tap uses your location to remind you when you arrive at or leave places.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Tap uses the microphone so you can capture reminders by voice.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Tap transcribes your voice to create reminders.";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Waqt shows your calendar events next to your reminders. It never changes your calendar.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Waqt needs background location access so location reminders fire even when the app is closed.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Waqt uses your location to remind you when you arrive at or leave places.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Waqt uses the microphone so you can capture reminders by voice.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Waqt transcribes your voice to create reminders.";
 				INFOPLIST_KEY_UIBackgroundModes = location;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;

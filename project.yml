@@ -68,6 +68,8 @@ targets:
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Tap needs background location access so location reminders fire even when the app is closed."
         INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: "Tap shows your calendar events next to your reminders. It never changes your calendar."
         INFOPLIST_KEY_UIBackgroundModes: location
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        CODE_SIGN_ENTITLEMENTS: Tap/Tap.entitlements
         SWIFT_VERSION: 5.9
         TARGETED_DEVICE_FAMILY: 1
         CODE_SIGN_STYLE: Automatic

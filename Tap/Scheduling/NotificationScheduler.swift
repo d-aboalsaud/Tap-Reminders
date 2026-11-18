@@ -66,7 +66,12 @@ enum NotificationScheduler {
     /// fires first, RaceCoordinator rewrites this pending request to FULL content.
     static func scheduleTimeLeg(for reminder: Reminder) {
         if reminder.isInterval {
-            scheduleInterval(for: reminder)
+            // Interval reminders share one slot budget, so adding one re-spaces the others.
+            if let context = reminder.modelContext {
+                rescheduleIntervals(in: context)
+            } else {
+                scheduleInterval(for: reminder, slotShare: intervalSlotCap)
+            }
             return
         }
         if reminder.isRepeating {
@@ -100,7 +105,14 @@ enum NotificationScheduler {
         case .weekly:
             components.weekday = calendar.component(.weekday, from: fireDate)
         case .monthly:
-            components.day = calendar.component(.day, from: fireDate)
+            let day = calendar.component(.day, from: fireDate)
+            // A day-31 trigger never fires in 30-day months, so late days get
+            // one yearly trigger per month, clamped to that month's last day.
+            if day > 28 {
+                scheduleLateMonthly(for: reminder, day: day, hour: components.hour!, minute: components.minute!)
+                return
+            }
+            components.day = day
         case .daily, .none:
             break
         }
@@ -113,20 +125,84 @@ enum NotificationScheduler {
         UNUserNotificationCenter.current().add(request)
     }
 
+    private static func scheduleLateMonthly(for reminder: Reminder, day: Int, hour: Int, minute: Int) {
+        let center = UNUserNotificationCenter.current()
+        for month in 1...12 {
+            var components = DateComponents()
+            components.month = month
+            components.day = Reminder.monthlyFireDay(day, month: month)
+            components.hour = hour
+            components.minute = minute
+            center.add(UNNotificationRequest(
+                identifier: monthlySlotID(reminder.id, month),
+                content: fullContent(for: reminder),
+                trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+            ))
+        }
+    }
+
+    private static func monthlySlotID(_ id: UUID, _ month: Int) -> String {
+        "monthly-\(id.uuidString)-\(month)"
+    }
+
     /// Interval reminders fire every `intervalMinutes` within active hours.
     /// iOS has no native "every N minutes between X and Y" trigger, so we
     /// schedule one daily-repeating calendar notification per slot in the window.
     private static let intervalSlotCap = 24
-    private static func scheduleInterval(for reminder: Reminder) {
-        guard let interval = reminder.intervalMinutes, interval >= 1 else { return }
+    /// iOS keeps only the 64 soonest pending notifications and silently drops
+    /// the rest. All interval reminders share this many slots; the remainder
+    /// is left for one-off times, monthly slots, nags and snoozes.
+    private static let intervalSlotBudget = 40
+
+    /// Slots one interval reminder may use while `activeCount` of them share the budget.
+    static func intervalSlotShare(activeCount: Int) -> Int {
+        max(1, min(intervalSlotCap, intervalSlotBudget / max(activeCount, 1)))
+    }
+
+    /// Minutes between the notifications actually scheduled: the requested
+    /// interval, widened when the reminder's share of slots can't cover its window.
+    static func effectiveIntervalMinutes(for reminder: Reminder, slotShare: Int) -> Int? {
+        guard let interval = reminder.intervalMinutes, interval >= 1 else { return nil }
+        let window = (reminder.activeEndHour - reminder.activeStartHour) * 60
+        guard window > 0 else { return nil }
+        let wanted = window / interval + 1
+        guard wanted > slotShare else { return interval }
+        guard slotShare > 1 else { return window }
+        // Spread the available slots evenly across the window, in 5-minute steps.
+        let spread = Int((Double(window) / Double(slotShare - 1) / 5).rounded(.up)) * 5
+        return max(interval, spread)
+    }
+
+    /// Same as above, using the reminder's current share of the budget.
+    static func effectiveIntervalMinutes(for reminder: Reminder) -> Int? {
+        let count = reminder.modelContext.map { activeIntervalReminders(in: $0).count } ?? 1
+        return effectiveIntervalMinutes(for: reminder, slotShare: intervalSlotShare(activeCount: count))
+    }
+
+    private static func activeIntervalReminders(in context: ModelContext, excluding excludedID: UUID? = nil) -> [Reminder] {
+        let all = (try? context.fetch(FetchDescriptor<Reminder>())) ?? []
+        return all.filter { $0.isInterval && !$0.isCompleted && $0.id != excludedID }
+    }
+
+    /// Re-spaces every active interval reminder so together they fit the budget.
+    /// Called whenever one is added, edited or removed, and on app open.
+    static func rescheduleIntervals(in context: ModelContext, excluding excludedID: UUID? = nil) {
+        let active = activeIntervalReminders(in: context, excluding: excludedID)
+        let share = intervalSlotShare(activeCount: active.count)
+        for reminder in active {
+            cancelIntervalSlots(reminderID: reminder.id)
+            scheduleInterval(for: reminder, slotShare: share)
+        }
+    }
+
+    private static func scheduleInterval(for reminder: Reminder, slotShare: Int) {
+        guard let interval = effectiveIntervalMinutes(for: reminder, slotShare: slotShare) else { return }
         let startMinutes = reminder.activeStartHour * 60
         let endMinutes = reminder.activeEndHour * 60
-        guard endMinutes > startMinutes else { return }
         let center = UNUserNotificationCenter.current()
         var slot = startMinutes
         var index = 0
-        // Cap the number of slots to stay well under iOS's 64 pending limit.
-        while slot <= endMinutes && index < intervalSlotCap {
+        while slot <= endMinutes && index < slotShare {
             var components = DateComponents()
             components.hour = slot / 60
             components.minute = slot % 60
@@ -160,13 +236,20 @@ enum NotificationScheduler {
     static func cancelTimeLeg(for reminder: Reminder) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [reminder.timeNotificationID])
         cancelIntervalSlots(reminderID: reminder.id)
+        cancelMonthlySlots(reminderID: reminder.id)
+    }
+
+    static func cancelMonthlySlots(reminderID: UUID) {
+        let ids = (1...12).map { monthlySlotID(reminderID, $0) }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
     }
 
     static func cancelAll(for reminder: Reminder) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: [reminder.timeNotificationID, reminder.locationNotificationID]
+            withIdentifiers: [reminder.timeNotificationID, reminder.locationNotificationID, snoozeID(reminder.id)]
         )
         cancelIntervalSlots(reminderID: reminder.id)
+        cancelMonthlySlots(reminderID: reminder.id)
         cancelNags(reminderID: reminder.id)
     }
 
@@ -187,7 +270,19 @@ enum NotificationScheduler {
             .joined(separator: "\n")
         content.sound = anyUrgent ? urgentChime : chime
         content.interruptionLevel = anyUrgent ? .timeSensitive : .active
+        // Same category as single reminders → Done / Snooze act on the whole stack.
+        content.categoryIdentifier = NotificationDelegate.categoryID
+        content.userInfo = [
+            "reminderIDs": reminders.map(\.id.uuidString),
+            "isUrgent": anyUrgent,
+        ]
         deliverNow(id: "stack-\(UUID().uuidString)", content: content)
+    }
+
+    /// One pending snooze per reminder: re-snoozing replaces it, and completing
+    /// the reminder can cancel it by ID.
+    static func snoozeID(_ id: UUID) -> String {
+        "snooze-\(id.uuidString)"
     }
 
     // MARK: - Urgent re-alert (nag) series

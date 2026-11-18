@@ -93,7 +93,23 @@ struct ReminderDetailView: View {
             Text("Fires from \(Reminder.hourLabel(reminder.activeStartHour)) to \(Reminder.hourLabel(reminder.activeEndHour)), so it won't wake you at night.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+            if let effective = NotificationScheduler.effectiveIntervalMinutes(for: reminder),
+               effective != reminder.intervalMinutes {
+                Label(
+                    "iPhone limits how many notifications an app can schedule, so to cover the whole day Tap spaces this one to every \(Self.durationLabel(effective)).",
+                    systemImage: "exclamationmark.triangle.fill"
+                )
+                .font(.footnote)
+                .foregroundStyle(.orange)
+            }
         }
+    }
+
+    private static func durationLabel(_ minutes: Int) -> String {
+        guard minutes >= 60 else { return "\(minutes) min" }
+        let hours = minutes / 60, rest = minutes % 60
+        let h = hours == 1 ? "hour" : "\(hours) hours"
+        return rest == 0 ? h : "\(hours)h \(rest)m"
     }
 
     private var intervalBinding: Binding<Int> {

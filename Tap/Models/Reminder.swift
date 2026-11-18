@@ -186,9 +186,21 @@ final class Reminder {
             return dayStart >= firstDayStart
                 && calendar.component(.weekday, from: fireDate) == calendar.component(.weekday, from: day)
         case .monthly:
+            let fireDay = Self.monthlyFireDay(
+                calendar.component(.day, from: fireDate),
+                month: calendar.component(.month, from: day)
+            )
             return dayStart >= firstDayStart
-                && calendar.component(.day, from: fireDate) == calendar.component(.day, from: day)
+                && calendar.component(.day, from: day) == fireDay
         }
+    }
+
+    /// Day a monthly reminder lands on in `month`: its own day, clamped to the
+    /// month's last day (so "the 31st" fires on Apr 30 and Feb 28).
+    static func monthlyFireDay(_ day: Int, month: Int) -> Int {
+        // Fixed non-leap year: matches the yearly per-month notification triggers.
+        let daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        return min(day, daysInMonth[(month - 1) % 12])
     }
 
     /// A reminder is done once every set condition has fired (or it's marked completed).

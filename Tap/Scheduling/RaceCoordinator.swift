@@ -32,6 +32,10 @@ enum RaceCoordinator {
     static func deactivate(_ reminder: Reminder, geofence: GeofenceManager) {
         NotificationScheduler.cancelAll(for: reminder)
         geofence.stopMonitoring(reminder)
+        // Freed interval slots go back to the other interval reminders.
+        if reminder.isInterval, let context = reminder.modelContext {
+            NotificationScheduler.rescheduleIntervals(in: context, excluding: reminder.id)
+        }
     }
 
     /// Called from the CLLocationManager delegate when a monitored region fires.
@@ -122,6 +126,10 @@ enum RaceCoordinator {
             for sibling in siblings {
                 sibling.locationFired = true
                 geofence.stopMonitoring(sibling)
+            }
+            // Urgent members keep re-alerting until acknowledged, as they would alone.
+            for member in group where member.isUrgent {
+                NotificationScheduler.scheduleNags(for: member, startingAt: .now)
             }
         }
     }

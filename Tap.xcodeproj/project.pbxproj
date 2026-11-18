@@ -76,6 +76,7 @@
 		752DABEAC06148DB0D63660C /* TapUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TapUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AD10749ACF6DD25816EB399 /* SavedPlacesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedPlacesView.swift; sourceTree = "<group>"; };
 		95B910E2C9B228A7B506DCA2 /* VoiceCaptureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCaptureController.swift; sourceTree = "<group>"; };
+		98D85102C78E3DF6EFE23746 /* Tap.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Tap.entitlements; sourceTree = "<group>"; };
 		9A93CAA624B2EA63D2FBBC52 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		9FC6E154E305F208CD661293 /* TapUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapUITests.swift; sourceTree = "<group>"; };
 		A4136CEC4BEAAE9FAEF1C5C6 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
@@ -107,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				10B8334FCCB3F1C383A913F2 /* Assets.xcassets */,
+				98D85102C78E3DF6EFE23746 /* Tap.entitlements */,
 				882226FA892B9DB7E414A0CF /* App */,
 				6A704F9EF5E7F6C6BC6B9F82 /* Calendar */,
 				F3CECB094D46516B949AC68C /* Capture */,
@@ -430,6 +432,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Tap/Tap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -639,6 +642,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Tap/Tap.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

@@ -57,28 +57,35 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse
     ) async {
         let userInfo = response.notification.request.content.userInfo
-        let reminderID = (userInfo["reminderID"] as? String).flatMap(UUID.init(uuidString:))
+        // A single reminder carries "reminderID"; a same-place stack carries "reminderIDs".
+        let reminderIDs = ((userInfo["reminderIDs"] as? [String]) ?? [userInfo["reminderID"] as? String].compactMap { $0 })
+            .compactMap(UUID.init(uuidString:))
         await MainActor.run { AppRouter.shared.lastNotificationInteraction = .now }
 
         switch response.actionIdentifier {
         case Self.doneActionID:
-            if let id = reminderID { await markDone(id) }
+            for id in reminderIDs { await markDone(id) }
 
         case Self.snoozeActionID:
             // Acting on it stops the nagging; the snoozed delivery restarts it.
-            if let id = reminderID {
+            for id in reminderIDs {
                 NotificationScheduler.cancelNags(reminderID: id)
                 await rescheduleNagsAfterSnooze(reminderID: id)
             }
-            snooze(response.notification.request.content)
+            snooze(response.notification.request.content, reminderIDs: reminderIDs)
 
         case UNNotificationDefaultActionIdentifier:
             // Opening the reminder counts as acknowledged.
-            if let id = reminderID {
+            for id in reminderIDs {
                 NotificationScheduler.cancelNags(reminderID: id)
+            }
+            if !reminderIDs.isEmpty {
                 await MainActor.run {
                     AppRouter.shared.selectedTab = 1
-                    AppRouter.shared.pendingReminderID = id
+                    // A stack has no single page to open — land on the list.
+                    if reminderIDs.count == 1 {
+                        AppRouter.shared.pendingReminderID = reminderIDs[0]
+                    }
                 }
             }
 
@@ -121,11 +128,15 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 
     /// Re-delivers the same content later; category/userInfo carry over so the
     /// snoozed notification can itself be snoozed or completed.
-    private func snooze(_ content: UNNotificationContent) {
+    private func snooze(_ content: UNNotificationContent, reminderIDs: [UUID]) {
         guard let mutable = content.mutableCopy() as? UNMutableNotificationContent else { return }
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Self.snoozeInterval, repeats: false)
+        // A single reminder's snooze has a known ID so completing it cancels the snooze.
+        let identifier = reminderIDs.count == 1
+            ? NotificationScheduler.snoozeID(reminderIDs[0])
+            : "snooze-stack-\(UUID().uuidString)"
         let request = UNNotificationRequest(
-            identifier: "snooze-\(UUID().uuidString)",
+            identifier: identifier,
             content: mutable,
             trigger: trigger
         )
